@@ -1,3 +1,4 @@
+import * as React from "react";
 import { styled } from "@mui/material/styles";
 import Typography from "@mui/material/Typography";
 import TextField from "@mui/material/TextField";
@@ -14,6 +15,7 @@ import Stack from "@mui/material/Stack";
 import VolumeUpIcon from "@mui/icons-material/VolumeUp";
 import ContentPasteIcon from "@mui/icons-material/ContentPaste";
 import CreateIcon from "@mui/icons-material/Create";
+import { streamGenerate } from "../modal.js";
 
 const DrawerHeader = styled("div")(({ theme }) => ({
   display: "flex",
@@ -46,11 +48,41 @@ const Main = styled("main", { shouldForwardProp: (prop) => prop !== "open" })(
 );
 
 function Chat({ historyOpen }) {
+  const [message, setMessage] = React.useState("");
+  const [loading, setLoading] = React.useState(false);
+  const [chat, setChat] = React.useState([]);
+
+  const submitMessage = () => {
+    const chatQuery = [...chat, { role: "user", content: message }];
+    setChat([
+      ...chat,
+      { role: "user", content: message },
+      { role: "assistant", content: "..." },
+    ]);
+    const index = chat.length + 1;
+    setLoading(true);
+    setTimeout(() => {
+      streamGenerate(
+        chatQuery,
+        (content) => {
+          setChat((chat) => {
+            const newChat = [...chat];
+            newChat[index] = { role: "assistant", content };
+            return newChat;
+          });
+        },
+        () => setLoading(false)
+      );
+    }, 10);
+    setMessage("");
+  };
+
   return (
     <Main open={historyOpen}>
       <DrawerHeader />
-      {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+      {chat.map((chatMessage, i) => (
         <Card
+          key={i}
           sx={{
             width: "100%",
             margin: "4px 0px",
@@ -60,11 +92,9 @@ function Chat({ historyOpen }) {
         >
           <CardContent>
             <Typography sx={{ fontSize: 10 }} color="subtitle1" gutterBottom>
-              ChatGPT
+              {chatMessage.role}
             </Typography>
-            <Typography variant="body1">
-              well meaning and kindly. {i}
-            </Typography>
+            <Typography variant="body1">{chatMessage.content}</Typography>
           </CardContent>
           <CardActions>
             <IconButton size="small" color="primary">
@@ -96,11 +126,17 @@ function Chat({ historyOpen }) {
           fullWidth
           multiline
           rows={4}
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
           placeholder="Enter a message here..."
         />
         <Divider orientation="vertical" />
         <Stack>
-          <IconButton color="primary">
+          <IconButton
+            color="primary"
+            onClick={submitMessage}
+            disabled={loading}
+          >
             <SendIcon sx={{ fontSize: "2rem" }} />
           </IconButton>
           <IconButton color="secondary">
