@@ -15,6 +15,8 @@ import Stack from "@mui/material/Stack";
 import VolumeUpIcon from "@mui/icons-material/VolumeUp";
 import ContentPasteIcon from "@mui/icons-material/ContentPaste";
 import CreateIcon from "@mui/icons-material/Create";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { streamGenerate } from "../modal.js";
 
 const DrawerHeader = styled("div")(({ theme }) => ({
@@ -68,6 +70,9 @@ function Chat({ historyOpen }) {
           setChat((chat) => {
             const newChat = [...chat];
             newChat[index] = { role: "assistant", content };
+            if (index === chat.length - 1) {
+              window.scrollBy(0, 100);
+            }
             return newChat;
           });
         },
@@ -87,14 +92,20 @@ function Chat({ historyOpen }) {
             width: "100%",
             margin: "4px 0px",
             boxShadow: "0px 1px 1px -1px rgba(0,0,0,0.2)",
+            backgroundColor:
+              chatMessage.role === "user" ? "#1e1e1e" : "#101010",
           }}
           raised={false}
         >
           <CardContent>
-            <Typography sx={{ fontSize: 10 }} color="subtitle1" gutterBottom>
+            <Typography sx={{ fontSize: 10 }} gutterBottom>
               {chatMessage.role}
             </Typography>
-            <Typography variant="body1">{chatMessage.content}</Typography>
+            <ReactMarkdown
+              style={{ overflow: "hidden" }}
+              children={chatMessage.content}
+              remarkPlugins={[remarkGfm]}
+            />
           </CardContent>
           <CardActions>
             <IconButton size="small" color="primary">
@@ -109,11 +120,11 @@ function Chat({ historyOpen }) {
           </CardActions>
         </Card>
       ))}
-      <Box height={"8rem"}></Box>
+      <Box height={"9rem"}></Box>
       <Paper
         elevation={2}
         sx={{
-          p: "6px 6px",
+          p: "9px 7px",
           display: "flex",
           alignItems: "center",
           width: "100%",
@@ -129,6 +140,11 @@ function Chat({ historyOpen }) {
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           placeholder="Enter a message here..."
+          onKeyDown={(e) => {
+            if (e.keyCode === 13 && !e.ctrlKey) {
+              submitMessage();
+            }
+          }}
         />
         <Divider orientation="vertical" />
         <Stack>
