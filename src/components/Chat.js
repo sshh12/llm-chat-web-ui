@@ -7,9 +7,13 @@ import IconButton from "@mui/material/IconButton";
 import Card from "@mui/material/Card";
 import CardActions from "@mui/material/CardActions";
 import CardContent from "@mui/material/CardContent";
-import ShareIcon from "@mui/icons-material/Share";
 import Box from "@mui/material/Box";
 import SendIcon from "@mui/icons-material/Send";
+import SettingsApplicationsIcon from "@mui/icons-material/SettingsApplications";
+import Stack from "@mui/material/Stack";
+import VolumeUpIcon from "@mui/icons-material/VolumeUp";
+import ContentPasteIcon from "@mui/icons-material/ContentPaste";
+import CreateIcon from "@mui/icons-material/Create";
 
 const DrawerHeader = styled("div")(({ theme }) => ({
   display: "flex",
@@ -63,8 +67,14 @@ function Chat({ historyOpen }) {
             </Typography>
           </CardContent>
           <CardActions>
-            <IconButton size="small">
-              <ShareIcon sx={{ fontSize: "1rem" }} />
+            <IconButton size="small" color="primary">
+              <VolumeUpIcon sx={{ fontSize: "1rem" }} />
+            </IconButton>
+            <IconButton size="small" color="primary">
+              <ContentPasteIcon sx={{ fontSize: "1rem" }} />
+            </IconButton>
+            <IconButton size="small" color="primary">
+              <CreateIcon sx={{ fontSize: "1rem" }} />
             </IconButton>
           </CardActions>
         </Card>
@@ -89,9 +99,14 @@ function Chat({ historyOpen }) {
           placeholder="Enter a message here..."
         />
         <Divider orientation="vertical" />
-        <IconButton color="primary">
-          <SendIcon sx={{ fontSize: "2rem" }} />
-        </IconButton>
+        <Stack>
+          <IconButton color="primary">
+            <SendIcon sx={{ fontSize: "2rem" }} />
+          </IconButton>
+          <IconButton color="secondary">
+            <SettingsApplicationsIcon />
+          </IconButton>
+        </Stack>
       </Paper>
     </Main>
   );

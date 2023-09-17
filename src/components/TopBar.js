@@ -6,6 +6,7 @@ import IconButton from "@mui/material/IconButton";
 import MenuIcon from "@mui/icons-material/Menu";
 import SettingsApplicationsIcon from "@mui/icons-material/SettingsApplications";
 import AddIcon from "@mui/icons-material/Add";
+import ShareIcon from "@mui/icons-material/Share";
 import Stack from "@mui/material/Stack";
 
 const drawerWidth = 240;
@@ -40,13 +41,16 @@ function TopBar({ historyOpen, handleDrawerOpen }) {
           <MenuIcon />
         </IconButton>
         <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
-          LLM Chat
+          Chat
         </Typography>
         <Stack direction="row" spacing={0} edge="end">
-          <IconButton size="large" color="inherit">
+          <IconButton size="large" color="secondary">
             <SettingsApplicationsIcon />
           </IconButton>
-          <IconButton color="inherit" size="large">
+          <IconButton size="large" color="primary">
+            <ShareIcon />
+          </IconButton>
+          <IconButton color="primary" size="large">
             <AddIcon />
           </IconButton>
         </Stack>
