@@ -135,7 +135,7 @@ function Chat({ historyOpen }) {
           <IconButton
             color="primary"
             onClick={submitMessage}
-            disabled={loading}
+            disabled={loading || message.length === 0}
           >
             <SendIcon sx={{ fontSize: "2rem" }} />
           </IconButton>
