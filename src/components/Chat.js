@@ -4,11 +4,12 @@ import TextField from "@mui/material/TextField";
 import Paper from "@mui/material/Paper";
 import Divider from "@mui/material/Divider";
 import IconButton from "@mui/material/IconButton";
-import DirectionsIcon from "@mui/icons-material/Directions";
 import Card from "@mui/material/Card";
 import CardActions from "@mui/material/CardActions";
 import CardContent from "@mui/material/CardContent";
 import ShareIcon from "@mui/icons-material/Share";
+import Box from "@mui/material/Box";
+import SendIcon from "@mui/icons-material/Send";
 
 const DrawerHeader = styled("div")(({ theme }) => ({
   display: "flex",
@@ -44,7 +45,7 @@ function Chat({ historyOpen }) {
   return (
     <Main open={historyOpen}>
       <DrawerHeader />
-      {[1, 2, 3, 4, 5, 6, 7, 8].map(() => (
+      {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
         <Card
           sx={{
             width: "100%",
@@ -57,7 +58,9 @@ function Chat({ historyOpen }) {
             <Typography sx={{ fontSize: 10 }} color="subtitle1" gutterBottom>
               ChatGPT
             </Typography>
-            <Typography variant="body1">well meaning and kindly.</Typography>
+            <Typography variant="body1">
+              well meaning and kindly. {i}
+            </Typography>
           </CardContent>
           <CardActions>
             <IconButton size="small">
@@ -66,6 +69,7 @@ function Chat({ historyOpen }) {
           </CardActions>
         </Card>
       ))}
+      <Box height={"8rem"}></Box>
       <Paper
         elevation={2}
         sx={{
@@ -86,7 +90,7 @@ function Chat({ historyOpen }) {
         />
         <Divider orientation="vertical" />
         <IconButton color="primary">
-          <DirectionsIcon sx={{ fontSize: "2rem" }} />
+          <SendIcon sx={{ fontSize: "2rem" }} />
         </IconButton>
       </Paper>
     </Main>

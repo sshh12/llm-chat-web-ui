@@ -4,7 +4,9 @@ import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
 import MenuIcon from "@mui/icons-material/Menu";
-import AccountCircle from "@mui/icons-material/AccountCircle";
+import SettingsApplicationsIcon from "@mui/icons-material/SettingsApplications";
+import AddIcon from "@mui/icons-material/Add";
+import Stack from "@mui/material/Stack";
 
 const drawerWidth = 240;
 
@@ -40,9 +42,14 @@ function TopBar({ historyOpen, handleDrawerOpen }) {
         <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
           LLM Chat
         </Typography>
-        <IconButton size="large" color="inherit" edge="end">
-          <AccountCircle />
-        </IconButton>
+        <Stack direction="row" spacing={0} edge="end">
+          <IconButton size="large" color="inherit">
+            <SettingsApplicationsIcon />
+          </IconButton>
+          <IconButton color="inherit" size="large">
+            <AddIcon />
+          </IconButton>
+        </Stack>
       </Toolbar>
     </AppBarStyled>
   );
