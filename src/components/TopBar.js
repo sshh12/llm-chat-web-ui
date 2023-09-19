@@ -4,7 +4,6 @@ import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
 import MenuIcon from "@mui/icons-material/Menu";
-import SettingsApplicationsIcon from "@mui/icons-material/SettingsApplications";
 import AddIcon from "@mui/icons-material/Add";
 import ShareIcon from "@mui/icons-material/Share";
 import Stack from "@mui/material/Stack";
@@ -68,9 +67,6 @@ function TopBar({
               <ShareIcon />
             </IconButton>
           )}
-          <IconButton size="large" color="secondary">
-            <SettingsApplicationsIcon />
-          </IconButton>
           <IconButton color="primary" size="large" onClick={() => onNewChat()}>
             <AddIcon />
           </IconButton>
