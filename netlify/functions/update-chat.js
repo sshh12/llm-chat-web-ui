@@ -51,7 +51,10 @@ exports.handler = async (event, context) => {
   } else {
     chat = await prisma.chat.findFirst({
       where: { id },
+      include: { user: true },
     });
+    if (chat.user.apiKey !== apiKey)
+      return { statusCode: 403, body: "Not authorized" };
     await prisma.message.deleteMany({
       where: { chatId: id },
     });

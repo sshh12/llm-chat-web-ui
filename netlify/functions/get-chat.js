@@ -13,8 +13,10 @@ exports.handler = async (event, context) => {
   }
   const chat = await prisma.chat.findFirst({
     where: { id: chatId },
-    include: { messages: true },
+    include: { messages: true, user: true },
   });
+  if (chat.user.apiKey !== apiKey)
+    return { statusCode: 403, body: "Not authorized" };
   return {
     statusCode: 200,
     body: JSON.stringify(

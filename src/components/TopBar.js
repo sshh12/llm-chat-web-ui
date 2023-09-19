@@ -37,6 +37,7 @@ function TopBar({
   onNewChat,
   loading,
   generating,
+  user,
 }) {
   return (
     <AppBarStyled position="fixed" open={historyOpen}>
@@ -67,9 +68,15 @@ function TopBar({
               <ShareIcon />
             </IconButton>
           )}
-          <IconButton color="primary" size="large" onClick={() => onNewChat()}>
-            <AddIcon />
-          </IconButton>
+          {user && (
+            <IconButton
+              color="primary"
+              size="large"
+              onClick={() => onNewChat()}
+            >
+              <AddIcon />
+            </IconButton>
+          )}
         </Stack>
       </Toolbar>
       {loading && <LinearProgress />}

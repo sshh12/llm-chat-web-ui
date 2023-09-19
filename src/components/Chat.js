@@ -56,7 +56,7 @@ function Chat({ historyOpen, onChatUpdate, curChat, setGenerating }) {
   const [chat, setChat] = React.useState([]);
 
   React.useEffect(() => {
-    if (curChat.messages) {
+    if (curChat?.messages) {
       setChat(
         curChat.messages.map((message) => ({
           content: message.text,

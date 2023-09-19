@@ -11,17 +11,21 @@ const darkTheme = createTheme({
 });
 
 function App() {
+  const urlParams = React.useMemo(
+    () => new URLSearchParams(window.location.search),
+    []
+  );
   const [apiKey] = React.useState(localStorage.getItem("llmchat:apiKey"));
   React.useEffect(() => {
-    const apiKey = new URLSearchParams(window.location.search).get("key");
+    const apiKey = urlParams.get("key");
     if (apiKey) {
       localStorage.setItem("llmchat:apiKey", apiKey.trim());
       window.location = "/";
     }
-  }, []);
+  }, [urlParams]);
   return (
     <ThemeProvider theme={darkTheme}>
-      <LoginDialog open={apiKey === null} />
+      <LoginDialog open={apiKey === null && !urlParams.get("chatId")} />
       <ChatView theme={darkTheme} />
     </ThemeProvider>
   );

@@ -76,6 +76,7 @@ function ChatView({ theme }) {
         curChat={curChat}
         onDeleteChat={onDeleteChat}
         onNewChat={onNewChat}
+        user={user}
       />
       <HistoryDrawer
         open={historyOpen}
