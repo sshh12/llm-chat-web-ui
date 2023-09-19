@@ -50,10 +50,6 @@ function ChatView({ theme }) {
       setCurChatId(null);
       window.history.pushState({}, "", "/");
       setTaskLoading(false);
-      console.log(
-        chatId,
-        user.chats.filter((c) => c.id !== chatId)
-      );
       setUser((user) => ({
         ...user,
         chats: user.chats.filter((c) => c.id !== chatId),
@@ -63,6 +59,8 @@ function ChatView({ theme }) {
 
   const onNewChat = () => {
     setCurChatId(null);
+    window.history.pushState({}, "", "/");
+    setTaskLoading(false);
   };
 
   return (
