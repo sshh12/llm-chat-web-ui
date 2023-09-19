@@ -1,0 +1,8 @@
+.chat-markdown a {
+  color: #1976d2;
+}
+
+.chat-markdown img {
+  max-width: 85vw;
+  max-height: 85vh;
+}

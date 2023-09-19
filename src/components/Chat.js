@@ -122,6 +122,7 @@ function Chat({ historyOpen, onChatUpdate, curChat, setGenerating }) {
               {chatMessage.role}
             </Typography>
             <ReactMarkdown
+              className="chat-markdown"
               style={{ overflow: "hidden" }}
               children={chatMessage.content}
               remarkPlugins={[remarkGfm]}
