@@ -54,7 +54,7 @@ function TopBar({
           {curChat?.name || "Chat"}
         </Typography>
         <Stack direction="row" spacing={0} edge="end">
-          {curChat.id && (
+          {curChat?.id && (
             <IconButton
               size="large"
               color="warning"
@@ -63,7 +63,7 @@ function TopBar({
               <DeleteIcon />
             </IconButton>
           )}
-          {curChat.id && (
+          {curChat?.id && (
             <IconButton size="large" color="success">
               <ShareIcon />
             </IconButton>

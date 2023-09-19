@@ -30,6 +30,7 @@ function ChatView({ theme }) {
     setTaskLoading(true);
     updateChat({ id: curChatId, messages: messages }).then((chat) => {
       setCurChatId(chat.id);
+      window.history.pushState({}, "", "?chatId=" + chat.id);
       setTaskLoading(false);
       setUser((user) => ({
         ...user,
