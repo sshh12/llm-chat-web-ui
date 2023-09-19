@@ -1,7 +1,9 @@
 import * as React from "react";
 
 const BASE_URL =
-  window.location.hostname === "localhost" ? "http://localhost:9999" : "/";
+  window.location.hostname === "localhost"
+    ? "http://localhost:9999"
+    : process.env.PUBLIC_URL;
 const API_KEY_KEY = "llmchat:apiKey";
 
 export function useDefaultPersistentGet(key, path, extraParams = "unused=1") {
