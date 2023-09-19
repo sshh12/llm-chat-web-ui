@@ -1,11 +1,8 @@
 import "./App.css";
 import * as React from "react";
-import Chat from "./components/Chat";
-import HistoryDrawer from "./components/HistoryDrawer";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
-import Box from "@mui/material/Box";
-import CssBaseline from "@mui/material/CssBaseline";
-import TopBar from "./components/TopBar";
+import ChatView from "./components/ChatView";
+import LoginDialog from "./components/LoginDialog";
 
 const darkTheme = createTheme({
   palette: {
@@ -14,28 +11,18 @@ const darkTheme = createTheme({
 });
 
 function App() {
-  const [historyOpen, setHistoryOpen] = React.useState(false);
-
-  const handleDrawerOpen = () => {
-    setHistoryOpen(true);
-  };
-
-  const handleDrawerClose = () => {
-    setHistoryOpen(false);
-  };
-
+  const [apiKey] = React.useState(localStorage.getItem("llmchat:apiKey"));
+  React.useEffect(() => {
+    const apiKey = new URLSearchParams(window.location.search).get("key");
+    if (apiKey) {
+      localStorage.setItem("llmchat:apiKey", apiKey.trim());
+      window.location = "/";
+    }
+  }, []);
   return (
     <ThemeProvider theme={darkTheme}>
-      <Box sx={{ display: "flex" }}>
-        <CssBaseline />
-        <TopBar historyOpen={historyOpen} handleDrawerOpen={handleDrawerOpen} />
-        <HistoryDrawer
-          open={historyOpen}
-          handleDrawerClose={handleDrawerClose}
-          theme={darkTheme}
-        />
-        <Chat historyOpen={historyOpen} />
-      </Box>
+      <LoginDialog open={apiKey === null} />
+      <ChatView theme={darkTheme} />
     </ThemeProvider>
   );
 }

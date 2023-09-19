@@ -8,6 +8,8 @@ import SettingsApplicationsIcon from "@mui/icons-material/SettingsApplications";
 import AddIcon from "@mui/icons-material/Add";
 import ShareIcon from "@mui/icons-material/Share";
 import Stack from "@mui/material/Stack";
+import DeleteIcon from "@mui/icons-material/Delete";
+import LinearProgress from "@mui/material/LinearProgress";
 
 const drawerWidth = 240;
 
@@ -28,7 +30,15 @@ const AppBarStyled = styled(AppBar, {
   }),
 }));
 
-function TopBar({ historyOpen, handleDrawerOpen }) {
+function TopBar({
+  historyOpen,
+  handleDrawerOpen,
+  curChat,
+  onDeleteChat,
+  onNewChat,
+  loading,
+  generating,
+}) {
   return (
     <AppBarStyled position="fixed" open={historyOpen}>
       <Toolbar>
@@ -41,20 +51,33 @@ function TopBar({ historyOpen, handleDrawerOpen }) {
           <MenuIcon />
         </IconButton>
         <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
-          Chat
+          {curChat?.name || "Chat"}
         </Typography>
         <Stack direction="row" spacing={0} edge="end">
+          {curChat.id && (
+            <IconButton
+              size="large"
+              color="warning"
+              onClick={() => onDeleteChat(curChat.id)}
+            >
+              <DeleteIcon />
+            </IconButton>
+          )}
+          {curChat.id && (
+            <IconButton size="large" color="success">
+              <ShareIcon />
+            </IconButton>
+          )}
           <IconButton size="large" color="secondary">
             <SettingsApplicationsIcon />
           </IconButton>
-          <IconButton size="large" color="primary">
-            <ShareIcon />
-          </IconButton>
-          <IconButton color="primary" size="large">
+          <IconButton color="primary" size="large" onClick={() => onNewChat()}>
             <AddIcon />
           </IconButton>
         </Stack>
       </Toolbar>
+      {loading && <LinearProgress />}
+      {generating && <LinearProgress color="success" />}
     </AppBarStyled>
   );
 }

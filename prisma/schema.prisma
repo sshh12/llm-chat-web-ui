@@ -4,6 +4,11 @@ generator client {
   binaryTargets = ["native", "rhel-openssl-1.0.x"]
 }
 
+// generator pyclient {
+//   provider             = "prisma-client-py"
+//   recursive_type_depth = 5
+// }
+
 datasource db {
   provider = "cockroachdb"
   url      = env("DATABASE_URL")
@@ -20,7 +25,7 @@ model User {
 
 model Chat {
   id              String @id
-  name            String @unique
+  name            String
   messages        Message[]
   chatSettings    Json?
   user            User @relation(fields: [userId], references: [id])
@@ -30,6 +35,7 @@ model Chat {
 
 model Message {
   id              BigInt @id @default(autoincrement())
+  role            String
   text            String
   chat            Chat @relation(fields: [chatId], references: [id])
   chatId          String

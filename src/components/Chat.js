@@ -30,40 +30,55 @@ const DrawerHeader = styled("div")(({ theme }) => ({
 
 const drawerWidth = 240;
 
-const Main = styled("main", { shouldForwardProp: (prop) => prop !== "open" })(
-  ({ theme, open }) => ({
-    flexGrow: 1,
-    padding: 0,
+const Main = styled(
+  "main",
+  {}
+)(({ theme, historyOpen }) => ({
+  flexGrow: 1,
+  padding: 0,
+  transition: theme.transitions.create("margin", {
+    easing: theme.transitions.easing.sharp,
+    duration: theme.transitions.duration.leavingScreen,
+  }),
+  marginLeft: `-${drawerWidth}px`,
+  ...(historyOpen && {
     transition: theme.transitions.create("margin", {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.leavingScreen,
+      easing: theme.transitions.easing.easeOut,
+      duration: theme.transitions.duration.enteringScreen,
     }),
-    marginLeft: `-${drawerWidth}px`,
-    ...(open && {
-      transition: theme.transitions.create("margin", {
-        easing: theme.transitions.easing.easeOut,
-        duration: theme.transitions.duration.enteringScreen,
-      }),
-      marginLeft: 0,
-    }),
-  })
-);
+    marginLeft: 0,
+  }),
+}));
 
-function Chat({ historyOpen }) {
+function Chat({ historyOpen, onChatUpdate, curChat, setGenerating }) {
   const [message, setMessage] = React.useState("");
   const [loading, setLoading] = React.useState(false);
   const [chat, setChat] = React.useState([]);
+
+  React.useEffect(() => {
+    if (curChat.messages) {
+      setChat(
+        curChat.messages.map((message) => ({
+          content: message.text,
+          role: message.role,
+        }))
+      );
+    }
+  }, [curChat]);
 
   const submitMessage = () => {
     const chatQuery = [...chat, { role: "user", content: message }];
     setChat([
       ...chat,
       { role: "user", content: message },
-      { role: "assistant", content: "..." },
+      { role: "assistant", content: "" },
     ]);
     const index = chat.length + 1;
+    let updatedChat;
     setLoading(true);
+    setGenerating(true);
     setTimeout(() => {
+      window.scrollBy(0, 1000);
       streamGenerate(
         chatQuery,
         (content) => {
@@ -71,12 +86,17 @@ function Chat({ historyOpen }) {
             const newChat = [...chat];
             newChat[index] = { role: "assistant", content };
             if (index === chat.length - 1) {
-              window.scrollBy(0, 100);
+              window.scrollBy(0, 1000);
             }
+            updatedChat = newChat;
             return newChat;
           });
         },
-        () => setLoading(false)
+        () => {
+          onChatUpdate(updatedChat);
+          setLoading(false);
+          setGenerating(false);
+        }
       );
     }, 10);
     setMessage("");
@@ -90,14 +110,14 @@ function Chat({ historyOpen }) {
           key={i}
           sx={{
             width: "100%",
-            margin: "4px 0px",
+            margin: "0px 0px",
             boxShadow: "0px 1px 1px -1px rgba(0,0,0,0.2)",
             backgroundColor:
               chatMessage.role === "user" ? "#1e1e1e" : "#101010",
           }}
           raised={false}
         >
-          <CardContent>
+          <CardContent sx={{ marginBottom: "-10px" }}>
             <Typography sx={{ fontSize: 10 }} gutterBottom>
               {chatMessage.role}
             </Typography>
@@ -142,6 +162,7 @@ function Chat({ historyOpen }) {
           placeholder="Enter a message here..."
           onKeyDown={(e) => {
             if (e.keyCode === 13 && !e.ctrlKey) {
+              e.preventDefault();
               submitMessage();
             }
           }}

@@ -16,12 +16,21 @@ const DrawerHeader = styled("div")(({ theme }) => ({
   display: "flex",
   alignItems: "center",
   padding: theme.spacing(0, 1),
-  // necessary for content to be below app bar
   ...theme.mixins.toolbar,
   justifyContent: "flex-end",
 }));
 
-function HistoryDrawer({ open, handleDrawerClose, theme }) {
+function HistoryDrawer({
+  open,
+  handleDrawerClose,
+  theme,
+  user,
+  onSelectChat,
+  selectedChatId,
+}) {
+  const chatsSorted = user.chats.sort(
+    (a, b) => -a.createdAt.localeCompare(b.createdAt)
+  );
   return (
     <Drawer
       sx={{
@@ -47,10 +56,15 @@ function HistoryDrawer({ open, handleDrawerClose, theme }) {
       </DrawerHeader>
       <Divider />
       <List>
-        {["Inbox", "Starred", "Send email", "Drafts"].map((text, index) => (
-          <ListItem key={text} disablePadding>
-            <ListItemButton>
-              <ListItemText primary={text} />
+        {chatsSorted.map((chat) => (
+          <ListItem key={chat.id} disablePadding>
+            <ListItemButton onClick={() => onSelectChat(chat.id)}>
+              {selectedChatId === chat.id && (
+                <ListItemText primary={<b>{chat.name}</b>} />
+              )}
+              {selectedChatId !== chat.id && (
+                <ListItemText primary={chat.name} />
+              )}
             </ListItemButton>
           </ListItem>
         ))}
