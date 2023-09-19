@@ -109,7 +109,7 @@ function Chat({ historyOpen, onChatUpdate, curChat, setGenerating }) {
         <Card
           key={i}
           sx={{
-            width: "100%",
+            width: "100vw",
             margin: "0px 0px",
             boxShadow: "0px 1px 1px -1px rgba(0,0,0,0.2)",
             backgroundColor:
@@ -117,16 +117,18 @@ function Chat({ historyOpen, onChatUpdate, curChat, setGenerating }) {
           }}
           raised={false}
         >
-          <CardContent sx={{ marginBottom: "-10px" }}>
-            <Typography sx={{ fontSize: 10 }} gutterBottom>
+          <CardContent>
+            <Typography sx={{ fontSize: 12, color: "#eee" }} gutterBottom>
               {chatMessage.role}
             </Typography>
-            <ReactMarkdown
-              className="chat-markdown"
-              style={{ overflow: "hidden" }}
-              children={chatMessage.content}
-              remarkPlugins={[remarkGfm]}
-            />
+            <Box sx={{ marginBottom: "-10px", overflowX: "scroll" }}>
+              <ReactMarkdown
+                className="chat-markdown"
+                style={{ overflow: "hidden" }}
+                children={chatMessage.content}
+                remarkPlugins={[remarkGfm]}
+              />
+            </Box>
           </CardContent>
           <CardActions>
             <IconButton size="small" color="primary">
