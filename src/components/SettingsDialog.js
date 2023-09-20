@@ -8,6 +8,9 @@ import InputLabel from "@mui/material/InputLabel";
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
+import Slider from "@mui/material/Slider";
+import Typography from "@mui/material/Typography";
+import Box from "@mui/material/Box";
 
 const MODELS = ["openai:gpt-3.5-turbo", "openai:gpt-4"];
 
@@ -17,6 +20,9 @@ export function fixSettings(settings) {
   }
   if (!settings.model) {
     settings.model = MODELS[0];
+  }
+  if (!settings.temperature) {
+    settings.temperature = 0.0;
   }
   return settings;
 }
@@ -51,6 +57,22 @@ export default function SettingsDialog({
               ))}
             </Select>
           </FormControl>
+          <Box sx={{ paddingTop: "10px" }}>
+            <Typography gutterBottom sx={{ fontSize: 12, color: "#eee" }}>
+              Temperature
+            </Typography>
+            <Slider
+              value={settings.temperature}
+              onChange={(e) => {
+                onUpdatedSettings(
+                  { ...settings, temperature: e.target.value },
+                  false
+                );
+              }}
+              step={0.1}
+              max={1.0}
+            />
+          </Box>
         </DialogContent>
         <DialogActions>
           <Button

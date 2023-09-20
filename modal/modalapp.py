@@ -29,8 +29,9 @@ class Message(BaseModel):
     secret=modal.Secret.from_name("llm-chat-secret"),
 )
 class OpenAIAPIModel:
-    def __init__(self, model: str):
+    def __init__(self, model: str, temperature: float):
         self.model = model
+        self.temperature = temperature
 
     @modal.method()
     def generate(self, chat: List[str]):
@@ -39,7 +40,7 @@ class OpenAIAPIModel:
         args = dict(
             model=self.model,
             messages=[dict(role=m.role, content=m.content) for m in chat],
-            temperature=0.0,
+            temperature=self.temperature,
             stream=True,
         )
         print(args)
@@ -55,6 +56,7 @@ class GenerateArgs(BaseModel):
     chat: List[Message]
     apiKey: str
     model: str
+    temperature: float
 
 
 @stub.function(
@@ -71,8 +73,10 @@ async def generate(args: GenerateArgs):
     if user is None:
         raise RuntimeError()
 
-    if args.model.startswith("openai"):
-        model = OpenAIAPIModel(args.model.split(":")[1])
+    model_namespace, model_name = args.model.split(":")
+
+    if model_namespace == "openai":
+        model = OpenAIAPIModel(model_name, temperature=args.temperature)
     else:
         raise RuntimeError()
 
