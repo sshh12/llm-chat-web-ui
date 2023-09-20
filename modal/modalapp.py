@@ -7,9 +7,7 @@ from pydantic import BaseModel
 import modal
 
 
-image_openai = modal.Image.debian_slim().pip_install(
-    "openai~=0.27",
-)
+image_base = modal.Image.debian_slim().pip_install("openai~=0.27", "prisma==0.10.0")
 stub = modal.Stub("llm-chat-web-ui")
 
 
@@ -19,10 +17,8 @@ class Message(BaseModel):
 
 
 @stub.cls(
-    image=image_openai,
-    secrets=[
-        modal.Secret.from_name("openai-secret"),
-    ],
+    image=image_base,
+    secret=modal.Secret.from_name("llm-chat-secret"),
 )
 class OpenAIAPIModel:
     @modal.method()
@@ -46,11 +42,25 @@ class OpenAIAPIModel:
 
 class GenerateArgs(BaseModel):
     chat: List[Message]
+    apiKey: str
 
 
-@stub.function()
+@stub.function(
+    secret=modal.Secret.from_name("llm-chat-secret"),
+    image=image_base.apt_install("curl").run_commands(
+        "curl https://raw.githubusercontent.com/sshh12/llm-chat-web-ui/main/prisma/schema.prisma > /root/schema.prisma",
+        "prisma generate --generator pyclient --schema /root/schema.prisma",
+    ),
+)
 @modal.web_endpoint(method="POST")
-def generate(args: GenerateArgs):
+async def generate(args: GenerateArgs):
+    from prisma import Prisma
+
+    prisma = Prisma()
+    await prisma.connect()
+    user = await prisma.user.find_first(where={"apiKey": args.apiKey})
+    print(user)
+
     model = OpenAIAPIModel()
     return StreamingResponse(
         model.generate.remote_gen(args.chat), media_type="text/event-stream"

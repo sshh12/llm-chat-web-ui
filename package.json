@@ -23,7 +23,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build && prisma generate"
+    "build": "react-scripts build && prisma generate --generator client"
   },
   "eslintConfig": {
     "extends": [

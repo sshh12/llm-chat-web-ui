@@ -6,7 +6,6 @@ import Paper from "@mui/material/Paper";
 import Divider from "@mui/material/Divider";
 import IconButton from "@mui/material/IconButton";
 import Card from "@mui/material/Card";
-import CardActions from "@mui/material/CardActions";
 import CardContent from "@mui/material/CardContent";
 import Box from "@mui/material/Box";
 import SendIcon from "@mui/icons-material/Send";
@@ -118,9 +117,22 @@ function Chat({ historyOpen, onChatUpdate, curChat, setGenerating }) {
           raised={false}
         >
           <CardContent>
-            <Typography sx={{ fontSize: 12, color: "#eee" }} gutterBottom>
-              {chatMessage.role}
-            </Typography>
+            <Stack direction={"row"} justifyContent="space-between">
+              <Typography sx={{ fontSize: 12, color: "#eee" }} gutterBottom>
+                {chatMessage.role}
+              </Typography>
+              <Box>
+                <IconButton size="small" color="primary">
+                  <VolumeUpIcon sx={{ fontSize: "1rem" }} />
+                </IconButton>
+                <IconButton size="small" color="primary">
+                  <ContentPasteIcon sx={{ fontSize: "1rem" }} />
+                </IconButton>
+                <IconButton size="small" color="primary">
+                  <CreateIcon sx={{ fontSize: "1rem" }} />
+                </IconButton>
+              </Box>
+            </Stack>
             <Box sx={{ marginBottom: "-10px", overflowX: "scroll" }}>
               <ReactMarkdown
                 className="chat-markdown"
@@ -130,17 +142,6 @@ function Chat({ historyOpen, onChatUpdate, curChat, setGenerating }) {
               />
             </Box>
           </CardContent>
-          <CardActions>
-            <IconButton size="small" color="primary">
-              <VolumeUpIcon sx={{ fontSize: "1rem" }} />
-            </IconButton>
-            <IconButton size="small" color="primary">
-              <ContentPasteIcon sx={{ fontSize: "1rem" }} />
-            </IconButton>
-            <IconButton size="small" color="primary">
-              <CreateIcon sx={{ fontSize: "1rem" }} />
-            </IconButton>
-          </CardActions>
         </Card>
       ))}
       <Box height={"9rem"}></Box>

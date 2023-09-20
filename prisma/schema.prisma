@@ -4,10 +4,10 @@ generator client {
   binaryTargets = ["native", "rhel-openssl-1.0.x"]
 }
 
-// generator pyclient {
-//   provider             = "prisma-client-py"
-//   recursive_type_depth = 5
-// }
+generator pyclient {
+  provider             = "prisma-client-py"
+  recursive_type_depth = 5
+}
 
 datasource db {
   provider = "cockroachdb"
