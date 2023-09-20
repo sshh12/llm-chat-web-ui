@@ -5,6 +5,7 @@ import Box from "@mui/material/Box";
 import CssBaseline from "@mui/material/CssBaseline";
 import TopBar from "./TopBar";
 import { useDefaultPersistentGet, useUpdate } from "../api";
+import SettingsDialog, { fixSettings } from "./SettingsDialog";
 
 function ChatView({ theme }) {
   const urlChatID =
@@ -12,26 +13,26 @@ function ChatView({ theme }) {
   const [historyOpen, setHistoryOpen] = React.useState(false);
   const [curChatId, setCurChatId] = React.useState(urlChatID);
   const [generating, setGenerating] = React.useState(false);
-  const [taskLoading, setTaskLoading] = React.useState(false);
+  const [openSettings, setOpenSettings] = React.useState(false);
 
   const [loadingUser, user, setUser] = useDefaultPersistentGet(
     "user",
     "/get-user"
   );
-  const [loadingChat, curChat] = useDefaultPersistentGet(
+  const [loadingChat, curChat, setCurChat] = useDefaultPersistentGet(
     "chat:" + curChatId,
     "/get-chat",
     "chatId=" + curChatId
   );
-  const [updateChat] = useUpdate("/update-chat");
-  const loading = loadingUser || loadingChat || taskLoading;
+  const [updateChat, loadingUpdateChat] = useUpdate("/update-chat");
+  const [updateUser, loadingUpdateUser] = useUpdate("/update-user");
+  const loading =
+    loadingUser || loadingChat || loadingUpdateChat || loadingUpdateUser;
 
   const onChatUpdate = (messages) => {
-    setTaskLoading(true);
     updateChat({ id: curChatId, messages: messages }).then((chat) => {
       setCurChatId(chat.id);
       window.history.pushState({}, "", "?chatId=" + chat.id);
-      setTaskLoading(false);
       setUser((user) => ({
         ...user,
         chats: user.chats.filter((c) => c.id !== chat.id).concat([chat]),
@@ -45,11 +46,9 @@ function ChatView({ theme }) {
   };
 
   const onDeleteChat = (chatId) => {
-    setTaskLoading(true);
     updateChat({ id: curChatId, doDelete: true }).then((chat) => {
       setCurChatId(null);
       window.history.pushState({}, "", "/");
-      setTaskLoading(false);
       setUser((user) => ({
         ...user,
         chats: user.chats.filter((c) => c.id !== chatId),
@@ -60,8 +59,22 @@ function ChatView({ theme }) {
   const onNewChat = () => {
     setCurChatId(null);
     window.history.pushState({}, "", "/");
-    setTaskLoading(false);
   };
+
+  const onUpdatedSettings = (settings, setDefault) => {
+    setCurChat((chat) => ({ ...chat, chatSettings: settings }));
+    if (curChatId !== null) {
+      updateChat({ id: curChatId, chatSettings: settings });
+    }
+    if (setDefault) {
+      setUser((user) => ({ ...user, chatSettings: settings }));
+      updateUser({ chatSettings: settings });
+    }
+  };
+
+  const settings = fixSettings(
+    Object.assign({}, user.chatSettings || {}, curChat.chatSettings || {})
+  );
 
   return (
     <Box sx={{ display: "flex" }}>
@@ -84,11 +97,19 @@ function ChatView({ theme }) {
         onSelectChat={onSelectChat}
         selectedChatId={curChatId}
       />
+      <SettingsDialog
+        settings={settings}
+        onUpdatedSettings={onUpdatedSettings}
+        open={openSettings}
+        setOpen={setOpenSettings}
+      />
       <Chat
         historyOpen={historyOpen}
         onChatUpdate={onChatUpdate}
         curChat={curChat}
         setGenerating={setGenerating}
+        setOpenSettings={setOpenSettings}
+        settings={settings}
       />
     </Box>
   );

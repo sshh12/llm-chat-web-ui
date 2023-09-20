@@ -7,7 +7,15 @@ from pydantic import BaseModel
 import modal
 
 
-image_base = modal.Image.debian_slim().pip_install("openai~=0.27", "prisma==0.10.0")
+image_base = (
+    modal.Image.debian_slim()
+    .pip_install("openai~=0.27", "prisma==0.10.0")
+    .apt_install("curl")
+    .run_commands(
+        "curl https://raw.githubusercontent.com/sshh12/llm-chat-web-ui/main/prisma/schema.prisma?42 > /root/schema.prisma",
+        "prisma generate --schema /root/schema.prisma",
+    )
+)
 stub = modal.Stub("llm-chat-web-ui")
 
 
@@ -21,12 +29,15 @@ class Message(BaseModel):
     secret=modal.Secret.from_name("llm-chat-secret"),
 )
 class OpenAIAPIModel:
+    def __init__(self, model: str):
+        self.model = model
+
     @modal.method()
     def generate(self, chat: List[str]):
         import openai
 
         args = dict(
-            model="gpt-3.5-turbo",
+            model=self.model,
             messages=[dict(role=m.role, content=m.content) for m in chat],
             temperature=0.0,
             stream=True,
@@ -43,14 +54,12 @@ class OpenAIAPIModel:
 class GenerateArgs(BaseModel):
     chat: List[Message]
     apiKey: str
+    model: str
 
 
 @stub.function(
     secret=modal.Secret.from_name("llm-chat-secret"),
-    image=image_base.apt_install("curl").run_commands(
-        "curl https://raw.githubusercontent.com/sshh12/llm-chat-web-ui/main/prisma/schema.prisma > /root/schema.prisma",
-        "prisma generate --generator pyclient --schema /root/schema.prisma",
-    ),
+    image=image_base,
 )
 @modal.web_endpoint(method="POST")
 async def generate(args: GenerateArgs):
@@ -59,9 +68,14 @@ async def generate(args: GenerateArgs):
     prisma = Prisma()
     await prisma.connect()
     user = await prisma.user.find_first(where={"apiKey": args.apiKey})
-    print(user)
+    if user is None:
+        raise RuntimeError()
 
-    model = OpenAIAPIModel()
+    if args.model.startswith("openai"):
+        model = OpenAIAPIModel(args.model.split(":")[1])
+    else:
+        raise RuntimeError()
+
     return StreamingResponse(
         model.generate.remote_gen(args.chat), media_type="text/event-stream"
     )

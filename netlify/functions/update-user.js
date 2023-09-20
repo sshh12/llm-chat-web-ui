@@ -3,17 +3,21 @@ const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
 exports.handler = async (event, context) => {
-  const { apiKey } = event.queryStringParameters;
+  const { apiKey, chatSettings } = JSON.parse(event.body);
   if (!apiKey) return { statusCode: 400, body: "No API key provided" };
   const user = await prisma.user.findFirst({
     where: { apiKey: apiKey },
-    include: { chats: true },
   });
+  if (chatSettings) {
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { chatSettings: chatSettings },
+    });
+  }
   return {
     statusCode: 200,
-    body: JSON.stringify(
-      { name: user.name, chats: user.chats, chatSettings: user.chatSettings },
-      (_key, value) => (typeof value === "bigint" ? value.toString() : value)
+    body: JSON.stringify(chat, (_key, value) =>
+      typeof value === "bigint" ? value.toString() : value
     ),
   };
 };

@@ -40,14 +40,19 @@ export function useDefaultPersistentGet(key, path, extraParams = "unused=1") {
 }
 
 export function useUpdate(path) {
+  const [loading, setLoading] = React.useState(false);
   const update = (newValue) => {
+    setLoading(true);
     return fetch(`${BASE_URL}/.netlify/functions${path}`, {
       method: "POST",
       body: JSON.stringify({
         ...newValue,
         apiKey: localStorage.getItem(API_KEY_KEY),
       }),
-    }).then((resp) => resp.json());
+    }).then((resp) => {
+      setLoading(false);
+      return resp.json();
+    });
   };
-  return [update];
+  return [update, loading];
 }

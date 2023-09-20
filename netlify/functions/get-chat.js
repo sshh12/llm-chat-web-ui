@@ -8,7 +8,12 @@ exports.handler = async (event, context) => {
   if (!chatId || chatId === "null") {
     return {
       statusCode: 200,
-      body: JSON.stringify({ id: null, name: null, messages: [] }),
+      body: JSON.stringify({
+        id: null,
+        name: null,
+        messages: [],
+        chatSettings: null,
+      }),
     };
   }
   const chat = await prisma.chat.findFirst({
@@ -20,7 +25,12 @@ exports.handler = async (event, context) => {
   return {
     statusCode: 200,
     body: JSON.stringify(
-      { id: chat.id, name: chat.name, messages: chat.messages },
+      {
+        id: chat.id,
+        name: chat.name,
+        messages: chat.messages,
+        chatSettings: chat.chatSettings,
+      },
       (_key, value) => (typeof value === "bigint" ? value.toString() : value)
     ),
   };

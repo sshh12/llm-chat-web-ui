@@ -49,7 +49,14 @@ const Main = styled(
   }),
 }));
 
-function Chat({ historyOpen, onChatUpdate, curChat, setGenerating }) {
+function Chat({
+  historyOpen,
+  onChatUpdate,
+  curChat,
+  setGenerating,
+  setOpenSettings,
+  settings,
+}) {
   const [message, setMessage] = React.useState("");
   const [loading, setLoading] = React.useState(false);
   const [chat, setChat] = React.useState([]);
@@ -80,6 +87,7 @@ function Chat({ historyOpen, onChatUpdate, curChat, setGenerating }) {
       window.scrollBy(0, 1000);
       streamGenerate(
         chatQuery,
+        settings,
         (content) => {
           setChat((chat) => {
             const newChat = [...chat];
@@ -180,7 +188,7 @@ function Chat({ historyOpen, onChatUpdate, curChat, setGenerating }) {
           >
             <SendIcon sx={{ fontSize: "2rem" }} />
           </IconButton>
-          <IconButton color="secondary">
+          <IconButton color="secondary" onClick={() => setOpenSettings(true)}>
             <SettingsApplicationsIcon />
           </IconButton>
         </Stack>

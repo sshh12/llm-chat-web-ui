@@ -26,9 +26,10 @@ const getChatTitle = async (messages) => {
 };
 
 exports.handler = async (event, context) => {
-  const { apiKey, id, messages, doDelete } = JSON.parse(event.body);
+  const { apiKey, id, messages, chatSettings, doDelete } = JSON.parse(
+    event.body
+  );
   if (!apiKey) return { statusCode: 400, body: "No API key provided" };
-  console.log(JSON.parse(event.body));
   const user = await prisma.user.findFirst({
     where: { apiKey: apiKey },
   });
@@ -55,14 +56,22 @@ exports.handler = async (event, context) => {
     });
     if (chat.user.apiKey !== apiKey)
       return { statusCode: 403, body: "Not authorized" };
-    await prisma.message.deleteMany({
-      where: { chatId: id },
-    });
     if (doDelete) {
+      await prisma.message.deleteMany({
+        where: { chatId: id },
+      });
       await prisma.chat.delete({
         where: { id },
       });
+    } else if (!messages && chatSettings) {
+      await prisma.chat.update({
+        where: { id },
+        data: { chatSettings: chatSettings },
+      });
     } else {
+      await prisma.message.deleteMany({
+        where: { chatId: id },
+      });
       await prisma.message.createMany({
         data: messages.map((message) => ({
           role: message.role,

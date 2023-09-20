@@ -1,9 +1,10 @@
 const CHAT_ENDPOINT = "https://sshh12--llm-chat-web-ui-generate.modal.run/";
 
-export function streamGenerate(chatQuery, onContent, onComplete) {
+export function streamGenerate(chatQuery, settings, onContent, onComplete) {
   const args = {
     chat: chatQuery,
     apiKey: localStorage.getItem("llmchat:apiKey"),
+    ...settings,
   };
   fetch(CHAT_ENDPOINT, {
     method: "POST",
