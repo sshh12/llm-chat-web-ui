@@ -57,7 +57,7 @@ export default function SettingsDialog({
               ))}
             </Select>
           </FormControl>
-          <Box sx={{ paddingTop: "10px" }}>
+          <Box sx={{ paddingTop: "3rem" }}>
             <Typography gutterBottom sx={{ fontSize: 12, color: "#eee" }}>
               Temperature
             </Typography>

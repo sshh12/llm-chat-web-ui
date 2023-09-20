@@ -1,21 +1,14 @@
 import * as React from "react";
 import { styled } from "@mui/material/styles";
-import Typography from "@mui/material/Typography";
 import TextField from "@mui/material/TextField";
 import Paper from "@mui/material/Paper";
 import Divider from "@mui/material/Divider";
 import IconButton from "@mui/material/IconButton";
-import Card from "@mui/material/Card";
-import CardContent from "@mui/material/CardContent";
 import Box from "@mui/material/Box";
 import SendIcon from "@mui/icons-material/Send";
 import SettingsApplicationsIcon from "@mui/icons-material/SettingsApplications";
 import Stack from "@mui/material/Stack";
-import VolumeUpIcon from "@mui/icons-material/VolumeUp";
-import ContentPasteIcon from "@mui/icons-material/ContentPaste";
-import CreateIcon from "@mui/icons-material/Create";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
+import ChatMessage from "./ChatMessage.js";
 import { streamGenerate } from "../modal.js";
 
 const DrawerHeader = styled("div")(({ theme }) => ({
@@ -113,44 +106,7 @@ function Chat({
     <Main open={historyOpen}>
       <DrawerHeader />
       {chat.map((chatMessage, i) => (
-        <Card
-          key={i}
-          sx={{
-            width: "100vw",
-            margin: "0px 0px",
-            boxShadow: "0px 1px 1px -1px rgba(0,0,0,0.2)",
-            backgroundColor:
-              chatMessage.role === "user" ? "#1e1e1e" : "#101010",
-          }}
-          raised={false}
-        >
-          <CardContent>
-            <Stack direction={"row"} justifyContent="space-between">
-              <Typography sx={{ fontSize: 12, color: "#eee" }} gutterBottom>
-                {chatMessage.role}
-              </Typography>
-              <Box>
-                <IconButton size="small" color="primary">
-                  <VolumeUpIcon sx={{ fontSize: "1rem" }} />
-                </IconButton>
-                <IconButton size="small" color="primary">
-                  <ContentPasteIcon sx={{ fontSize: "1rem" }} />
-                </IconButton>
-                <IconButton size="small" color="primary">
-                  <CreateIcon sx={{ fontSize: "1rem" }} />
-                </IconButton>
-              </Box>
-            </Stack>
-            <Box sx={{ marginBottom: "-10px", overflowX: "scroll" }}>
-              <ReactMarkdown
-                className="chat-markdown"
-                style={{ overflow: "hidden" }}
-                children={chatMessage.content}
-                remarkPlugins={[remarkGfm]}
-              />
-            </Box>
-          </CardContent>
-        </Card>
+        <ChatMessage key={i} chatMessage={chatMessage} />
       ))}
       <Box height={"9rem"}></Box>
       <Paper
