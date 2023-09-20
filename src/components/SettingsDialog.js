@@ -12,7 +12,11 @@ import Slider from "@mui/material/Slider";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 
-const MODELS = ["openai:gpt-3.5-turbo", "openai:gpt-4"];
+const MODELS = [
+  "openai:gpt-3.5-turbo",
+  "openai:gpt-4",
+  "mlc:Llama-2-13b-chat-hf-q4f16",
+];
 
 export function fixSettings(settings) {
   if (settings === null) {
