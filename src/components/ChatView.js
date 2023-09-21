@@ -29,8 +29,16 @@ function ChatView({ theme }) {
   const loading =
     loadingUser || loadingChat || loadingUpdateChat || loadingUpdateUser;
 
+  const settings = fixSettings(
+    Object.assign({}, user?.chatSettings || {}, curChat?.chatSettings || {})
+  );
+
   const onChatUpdate = (messages) => {
-    updateChat({ id: curChatId, messages: messages }).then((chat) => {
+    updateChat({
+      id: curChatId,
+      messages: messages,
+      chatSettings: settings,
+    }).then((chat) => {
       setCurChatId(chat.id);
       setCurChat(() => chat);
       window.history.pushState({}, "", "?chatId=" + chat.id);
@@ -72,10 +80,6 @@ function ChatView({ theme }) {
       updateUser({ chatSettings: settings });
     }
   };
-
-  const settings = fixSettings(
-    Object.assign({}, user?.chatSettings || {}, curChat?.chatSettings || {})
-  );
 
   return (
     <Box sx={{ display: "flex" }}>
