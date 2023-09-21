@@ -3,12 +3,14 @@ import modal
 
 from modal_base import stub, Message
 
-MODEL_DIR = "/model"
+MODEL_DIR = "/root/model"
 
 
 def download_model_to_folder():
     from huggingface_hub import snapshot_download
     import os
+
+    os.makedirs(MODEL_DIR, exist_ok=True)
 
     snapshot_download(
         "meta-llama/Llama-2-13b-chat-hf",
