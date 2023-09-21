@@ -30,6 +30,7 @@ exports.handler = async (event, context) => {
         name: chat.name,
         messages: chat.messages,
         chatSettings: chat.chatSettings,
+        createdAt: chat.createdAt,
       },
       (_key, value) => (typeof value === "bigint" ? value.toString() : value)
     ),

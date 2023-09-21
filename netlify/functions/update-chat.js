@@ -83,8 +83,15 @@ exports.handler = async (event, context) => {
   }
   return {
     statusCode: 200,
-    body: JSON.stringify(chat, (_key, value) =>
-      typeof value === "bigint" ? value.toString() : value
+    body: JSON.stringify(
+      {
+        id: chat.id,
+        name: chat.name,
+        messages: chat.messages,
+        chatSettings: chat.chatSettings,
+        createdAt: chat.createdAt,
+      },
+      (_key, value) => (typeof value === "bigint" ? value.toString() : value)
     ),
   };
 };

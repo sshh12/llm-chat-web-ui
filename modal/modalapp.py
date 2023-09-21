@@ -13,6 +13,7 @@ class GenerateArgs(BaseModel):
     apiKey: str
     model: str
     temperature: float
+    systemPrompt: str
 
 
 @stub.function(
@@ -22,6 +23,7 @@ class GenerateArgs(BaseModel):
 @modal.web_endpoint(method="POST")
 async def generate(args: GenerateArgs):
     from prisma import Prisma
+    import datetime
 
     prisma = Prisma()
     await prisma.connect()
@@ -29,12 +31,18 @@ async def generate(args: GenerateArgs):
     if user is None:
         raise RuntimeError()
 
+    system_prompt = args.systemPrompt.replace(
+        "{{ datetime }}", datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    ).replace("{{ name }}", user.name)
+
     model_namespace, model_name = args.model.split(":")
 
     if model_namespace == "openai":
-        model = OpenAIAPIModel(model_name, temperature=args.temperature)
+        model = OpenAIAPIModel(
+            model_name, temperature=args.temperature, system_prompt=system_prompt
+        )
     elif model_namespace == "vllmhf":
-        model = VLLMHFModel(temperature=args.temperature)
+        model = VLLMHFModel(temperature=args.temperature, system_prompt=system_prompt)
     else:
         raise RuntimeError()
 

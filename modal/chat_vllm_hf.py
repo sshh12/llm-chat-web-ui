@@ -45,8 +45,9 @@ image = (
     secret=modal.Secret.from_name("llm-chat-secret"),
 )
 class VLLMHFModel:
-    def __init__(self, temperature: float):
+    def __init__(self, temperature: float, system_prompt: str):
         self.temperature = temperature
+        self.system_prompt = system_prompt
 
     def __enter__(self):
         from vllm import LLM
@@ -65,7 +66,7 @@ class VLLMHFModel:
         import json
 
         question = chat[-1].content
-        prompts = [self.template.format(system="", user=question)]
+        prompts = [self.template.format(system=self.system_prompt, user=question)]
         print(prompts)
         sampling_params = SamplingParams(
             temperature=max(self.temperature, 0.01),

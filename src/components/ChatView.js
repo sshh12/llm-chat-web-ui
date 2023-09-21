@@ -32,6 +32,7 @@ function ChatView({ theme }) {
   const onChatUpdate = (messages) => {
     updateChat({ id: curChatId, messages: messages }).then((chat) => {
       setCurChatId(chat.id);
+      setCurChat(() => chat);
       window.history.pushState({}, "", "?chatId=" + chat.id);
       setUser((user) => ({
         ...user,

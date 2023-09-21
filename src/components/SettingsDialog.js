@@ -10,6 +10,7 @@ import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import Slider from "@mui/material/Slider";
 import Typography from "@mui/material/Typography";
+import TextField from "@mui/material/TextField";
 import Box from "@mui/material/Box";
 
 const MODELS = [
@@ -17,6 +18,9 @@ const MODELS = [
   "openai:gpt-4",
   "vllmhf:meta-llama/Llama-2-13b-chat-hf",
 ];
+
+const DEFAULT_SYSTEM_PROMPT = `You are Chat LLM, an expert large language model.
+Current date and time: {{ datetime }}, you are talking to {{ name }}.`;
 
 export function fixSettings(settings) {
   if (settings === null) {
@@ -27,6 +31,9 @@ export function fixSettings(settings) {
   }
   if (!settings.temperature) {
     settings.temperature = 0.0;
+  }
+  if (!settings.systemPrompt) {
+    settings.systemPrompt = DEFAULT_SYSTEM_PROMPT;
   }
   return settings;
 }
@@ -61,6 +68,21 @@ export default function SettingsDialog({
               ))}
             </Select>
           </FormControl>
+          <TextField
+            sx={{ marginTop: "3rem" }}
+            label="System Prompt"
+            fullWidth
+            multiline
+            rows={4}
+            value={settings.systemPrompt}
+            onChange={(e) => {
+              onUpdatedSettings(
+                { ...settings, systemPrompt: e.target.value },
+                false
+              );
+            }}
+            placeholder="System Prompt"
+          />
           <Box sx={{ paddingTop: "3rem" }}>
             <Typography gutterBottom sx={{ fontSize: 12, color: "#eee" }}>
               Temperature

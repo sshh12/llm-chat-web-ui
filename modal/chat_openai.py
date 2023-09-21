@@ -11,9 +11,10 @@ from modal_base import image_base, stub, Message
     secret=modal.Secret.from_name("llm-chat-secret"),
 )
 class OpenAIAPIModel:
-    def __init__(self, model: str, temperature: float):
+    def __init__(self, model: str, temperature: float, system_prompt: str):
         self.model = model
         self.temperature = temperature
+        self.system_prompt = system_prompt
 
     @modal.method()
     def generate(self, chat: List[Message]):
@@ -21,7 +22,8 @@ class OpenAIAPIModel:
 
         args = dict(
             model=self.model,
-            messages=[dict(role=m.role, content=m.content) for m in chat],
+            messages=[dict(role="system", content=self.system_prompt)]
+            + [dict(role=m.role, content=m.content) for m in chat],
             temperature=self.temperature,
             stream=True,
         )
