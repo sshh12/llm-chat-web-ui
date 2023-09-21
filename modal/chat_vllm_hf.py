@@ -62,9 +62,11 @@ class VLLMHFModel:
     @modal.method()
     def generate(self, chat: List[Message]):
         from vllm import SamplingParams
+        import json
 
         question = chat[-1].content
         prompts = [self.template.format(system="", user=question)]
+        print(prompts)
         sampling_params = SamplingParams(
             temperature=max(self.temperature, 0.01),
             top_p=1,
@@ -73,4 +75,4 @@ class VLLMHFModel:
         )
         result = self.llm.generate(prompts, sampling_params)
         for output in result:
-            yield {"content": output.outputs[0].text}
+            yield json.dumps({"content": output.outputs[0].text}) + "\n"

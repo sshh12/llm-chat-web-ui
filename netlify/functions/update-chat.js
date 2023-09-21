@@ -63,7 +63,7 @@ exports.handler = async (event, context) => {
       await prisma.chat.delete({
         where: { id },
       });
-    } else if (!messages && chatSettings) {
+    } else if (chatSettings) {
       await prisma.chat.update({
         where: { id },
         data: { chatSettings: chatSettings },
