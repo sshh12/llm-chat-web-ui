@@ -15,7 +15,7 @@ import Box from "@mui/material/Box";
 const MODELS = [
   "openai:gpt-3.5-turbo",
   "openai:gpt-4",
-  "mlc:Llama-2-13b-chat-hf-q4f16",
+  "vllmhf:meta-llama/Llama-2-13b-chat-hf",
 ];
 
 export function fixSettings(settings) {

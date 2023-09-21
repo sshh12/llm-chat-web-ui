@@ -73,7 +73,7 @@ function ChatView({ theme }) {
   };
 
   const settings = fixSettings(
-    Object.assign({}, user.chatSettings || {}, curChat.chatSettings || {})
+    Object.assign({}, user?.chatSettings || {}, curChat?.chatSettings || {})
   );
 
   return (

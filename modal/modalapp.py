@@ -5,7 +5,7 @@ import modal
 
 from modal_base import image_base, stub, Message
 from chat_openai import OpenAIAPIModel
-from chat_mlc import MLCModel
+from chat_vllm_hf import VLLMHFModel
 
 
 class GenerateArgs(BaseModel):
@@ -33,8 +33,8 @@ async def generate(args: GenerateArgs):
 
     if model_namespace == "openai":
         model = OpenAIAPIModel(model_name, temperature=args.temperature)
-    elif model_namespace == "mlc":
-        model = MLCModel()
+    elif model_namespace == "vllmhf":
+        model = VLLMHFModel(temperature=args.temperature)
     else:
         raise RuntimeError()
 

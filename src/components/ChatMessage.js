@@ -4,16 +4,22 @@ import IconButton from "@mui/material/IconButton";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Box from "@mui/material/Box";
+import { Snackbar } from "@mui/material";
 import Stack from "@mui/material/Stack";
-import VolumeUpIcon from "@mui/icons-material/VolumeUp";
 import ContentPasteIcon from "@mui/icons-material/ContentPaste";
-import CreateIcon from "@mui/icons-material/Create";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { atomDark as dark } from "react-syntax-highlighter/dist/esm/styles/prism";
 
 export default function ChatMessage({ chatMessage }) {
+  const [showCopied, setShowCopied] = React.useState(false);
+
+  const onCopy = () => {
+    navigator.clipboard.writeText(chatMessage.content);
+    setShowCopied(true);
+  };
+
   return (
     <Card
       sx={{
@@ -24,24 +30,31 @@ export default function ChatMessage({ chatMessage }) {
       }}
       raised={false}
     >
+      <Snackbar
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+        open={showCopied}
+        autoHideDuration={2000}
+        onClose={() => setShowCopied(false)}
+        message="Copied!"
+      />
       <CardContent>
         <Stack direction={"row"} justifyContent="space-between">
           <Typography sx={{ fontSize: "0.8rem", color: "#eee" }} gutterBottom>
             {chatMessage.role}
           </Typography>
           <Box>
-            <IconButton size="small" color="primary">
+            {/* <IconButton size="small" color="primary">
               <VolumeUpIcon sx={{ fontSize: "1.3rem" }} />
-            </IconButton>
-            <IconButton size="small" color="primary">
+            </IconButton> */}
+            <IconButton size="small" color="primary" onClick={() => onCopy()}>
               <ContentPasteIcon sx={{ fontSize: "1.3rem" }} />
             </IconButton>
-            <IconButton size="small" color="primary">
+            {/* <IconButton size="small" color="primary">
               <CreateIcon sx={{ fontSize: "1.3rem" }} />
-            </IconButton>
+            </IconButton> */}
           </Box>
         </Stack>
-        <Box sx={{ marginBottom: "-10px", overflowX: "scroll" }}>
+        <Box sx={{ marginBottom: "-10px", overflowX: "hidden" }}>
           <ReactMarkdown
             className="chat-markdown"
             style={{ overflow: "hidden" }}

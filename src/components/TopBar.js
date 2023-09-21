@@ -5,7 +5,6 @@ import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
 import MenuIcon from "@mui/icons-material/Menu";
 import AddIcon from "@mui/icons-material/Add";
-import ShareIcon from "@mui/icons-material/Share";
 import Stack from "@mui/material/Stack";
 import DeleteIcon from "@mui/icons-material/Delete";
 import LinearProgress from "@mui/material/LinearProgress";
@@ -63,11 +62,11 @@ function TopBar({
               <DeleteIcon />
             </IconButton>
           )}
-          {curChat?.id && (
+          {/* {curChat?.id && (
             <IconButton size="large" color="success">
               <ShareIcon />
             </IconButton>
-          )}
+          )} */}
           {user && (
             <IconButton
               color="primary"
