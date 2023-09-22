@@ -16,11 +16,13 @@ import Box from "@mui/material/Box";
 const MODELS = [
   "openai:gpt-3.5-turbo",
   "openai:gpt-4",
-  "vllmhf:meta-llama/Llama-2-13b-chat-hf",
+  "openai_functions:gpt-3.5-turbo",
+  "openai_functions:gpt-4",
+  "vllm_hf:meta-llama/Llama-2-13b-chat-hf",
 ];
 
 const DEFAULT_SYSTEM_PROMPT = `You are Chat LLM, an expert large language model.
-Current date and time: {{ datetime }}, you are talking to {{ name }}.`;
+Current date and time: {{ datetime }}, you are talking to {{ name }}. Use markdown in your response.`;
 
 export function fixSettings(settings) {
   if (settings === null) {

@@ -17,6 +17,7 @@ export function streamGenerate(chatQuery, settings, onContent, onComplete) {
     const decoder = new TextDecoder("utf-8");
 
     let result = "";
+    let alert = "";
     let content = "";
     let data;
 
@@ -32,8 +33,13 @@ export function streamGenerate(chatQuery, settings, onContent, onComplete) {
 
         if (message) {
           const jsonObject = JSON.parse(message);
-          content += jsonObject.content;
-          onContent(content);
+          if (jsonObject.content) {
+            content += jsonObject.content;
+          }
+          if (jsonObject.alert) {
+            alert = jsonObject.alert;
+          }
+          onContent(content, alert);
         }
 
         endOfMessageIndex = result.indexOf("\n");

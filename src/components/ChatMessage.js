@@ -7,12 +7,13 @@ import Box from "@mui/material/Box";
 import { Snackbar } from "@mui/material";
 import Stack from "@mui/material/Stack";
 import ContentPasteIcon from "@mui/icons-material/ContentPaste";
+import Alert from "@mui/material/Alert";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { atomDark as dark } from "react-syntax-highlighter/dist/esm/styles/prism";
 
-export default function ChatMessage({ chatMessage }) {
+export default function ChatMessage({ chatMessage, alert }) {
   const [showCopied, setShowCopied] = React.useState(false);
 
   const onCopy = () => {
@@ -55,6 +56,7 @@ export default function ChatMessage({ chatMessage }) {
           </Box>
         </Stack>
         <Box sx={{ marginBottom: "-10px", overflowX: "hidden" }}>
+          {alert && <Alert severity="info">{alert}</Alert>}
           <ReactMarkdown
             className="chat-markdown"
             style={{ overflow: "hidden" }}

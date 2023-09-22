@@ -53,6 +53,7 @@ function Chat({
   const [message, setMessage] = React.useState("");
   const [loading, setLoading] = React.useState(false);
   const [chat, setChat] = React.useState([]);
+  const [alert, setAlert] = React.useState(null);
 
   React.useEffect(() => {
     if (curChat?.messages) {
@@ -81,10 +82,14 @@ function Chat({
       streamGenerate(
         chatQuery,
         settings,
-        (content) => {
+        (content, alert) => {
+          setAlert(alert);
           setChat((chat) => {
             const newChat = [...chat];
-            newChat[index] = { role: "assistant", content };
+            newChat[index] = {
+              role: "assistant",
+              content: content,
+            };
             if (index === chat.length - 1) {
               window.scrollBy(0, 1000);
             }
@@ -94,6 +99,7 @@ function Chat({
         },
         () => {
           onChatUpdate(updatedChat);
+          setAlert(null);
           setLoading(false);
           setGenerating(false);
         }
@@ -106,7 +112,11 @@ function Chat({
     <Main open={historyOpen}>
       <DrawerHeader />
       {chat.map((chatMessage, i) => (
-        <ChatMessage key={i} chatMessage={chatMessage} />
+        <ChatMessage
+          key={i}
+          chatMessage={chatMessage}
+          alert={i === chat.length - 1 ? alert : null}
+        />
       ))}
       <Box height={"9rem"}></Box>
       <Paper
