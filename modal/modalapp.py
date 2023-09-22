@@ -7,6 +7,7 @@ from modal_base import image_base, stub, Message
 from chat_openai import OpenAIAPIModel
 from chat_vllm_hf import VLLMHFModel
 from chat_openai_functions import OpenAIFunctionsAPIModel
+from chat_stablediffusion import StableDiffusionChatModel
 
 
 class GenerateArgs(BaseModel):
@@ -46,6 +47,8 @@ async def generate(args: GenerateArgs):
         model = OpenAIFunctionsAPIModel(
             model_name, temperature=args.temperature, system_prompt=system_prompt
         )
+    elif model_namespace == "stablediffusion":
+        model = StableDiffusionChatModel()
     elif model_namespace == "vllm_hf":
         model = VLLMHFModel(temperature=args.temperature, system_prompt=system_prompt)
     else:

@@ -18,6 +18,7 @@ const MODELS = [
   "openai_functions:gpt-3.5-turbo",
   "openai:gpt-4",
   "openai:gpt-3.5-turbo",
+  "stablediffusion:xl",
   "vllm_hf:meta-llama/Llama-2-13b-chat-hf",
 ];
 

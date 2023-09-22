@@ -2,6 +2,7 @@ from typing import List
 import modal
 
 from modal_base import image_base, stub, Message
+from image_generation import StableDiffusionModel
 
 
 def search(query: str, k: int = 10):
@@ -74,6 +75,10 @@ def run_wolframalpha(query: str):
         return f"Assumption: {assumption} \nAnswer: {answer}"
 
 
+def generate_image(prompt: str):
+    return repr(StableDiffusionModel.inference.remote(prompt))
+
+
 FUNCTIONS = [
     (
         {
@@ -102,6 +107,23 @@ FUNCTIONS = [
             },
         },
         run_wolframalpha,
+    ),
+    (
+        {
+            "name": "generate_image",
+            "description": "useful for facts, math, and other things that wolfram alpha can answer",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "prompt": {
+                        "type": "string",
+                        "description": "The prompt to use to generate the image, e.g. 'a cartoon of ..., in the style ..., 4k'",
+                    },
+                },
+                "required": ["prompt"],
+            },
+        },
+        generate_image,
     ),
 ]
 
