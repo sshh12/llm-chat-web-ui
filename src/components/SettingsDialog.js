@@ -14,10 +14,10 @@ import TextField from "@mui/material/TextField";
 import Box from "@mui/material/Box";
 
 const MODELS = [
-  "openai:gpt-3.5-turbo",
-  "openai:gpt-4",
-  "openai_functions:gpt-3.5-turbo",
   "openai_functions:gpt-4",
+  "openai_functions:gpt-3.5-turbo",
+  "openai:gpt-4",
+  "openai:gpt-3.5-turbo",
   "vllm_hf:meta-llama/Llama-2-13b-chat-hf",
 ];
 
