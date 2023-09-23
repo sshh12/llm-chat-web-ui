@@ -134,7 +134,7 @@ function Chat({
           onChange={(e) => setMessage(e.target.value)}
           placeholder="Enter a message here..."
           onKeyDown={(e) => {
-            if (e.keyCode === 13 && !e.ctrlKey) {
+            if (e.keyCode === 13 && !e.ctrlKey && !loading) {
               e.preventDefault();
               submitMessage();
             }
