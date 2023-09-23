@@ -70,7 +70,7 @@ WOLFRAM_ALPHA_APPID (https://developer.wolframalpha.com/)
 
 ### Add a new plugin
 
-_Note that plugins are only support for openai functions agents._
+_Note that plugins are only supported for openai functions agents._
 
 Just add a new function to `FUNCTIONS` in `modal/chat_openai_functions.py`.
 
