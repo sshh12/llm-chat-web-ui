@@ -74,7 +74,7 @@ _Note that plugins are only supported for openai functions agents._
 
 Just add a new function to `FUNCTIONS` in `modal/chat_openai_functions.py`.
 
-### Add a new modal
+### Add a new model
 
 1. Duplicate `modal/chat_vllm_hf.py` and adjust to whatever model you want
 2. Update `modal/modalapp.py` to check for this `model_namespace` in `generate` (then deploy modal)
