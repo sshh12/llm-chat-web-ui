@@ -41,7 +41,7 @@ registerRoute(
 
     return true;
   },
-  createHandlerBoundToURL(process.env.PUBLIC_URL + "/index.html")
+  createHandlerBoundToURL(process.env.PUBLIC_URL + "/")
 );
 
 // This allows the web app to trigger skipWaiting via
