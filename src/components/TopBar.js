@@ -31,7 +31,7 @@ const AppBarStyled = styled(AppBar, {
 function TopBar({
   historyOpen,
   handleDrawerOpen,
-  curChat,
+  chat,
   onDeleteChat,
   onNewChat,
   loading,
@@ -50,19 +50,19 @@ function TopBar({
           <MenuIcon />
         </IconButton>
         <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
-          {curChat?.name || "Chat"}
+          {chat?.name || "Chat"}
         </Typography>
         <Stack direction="row" spacing={0} edge="end">
-          {curChat?.id && (
+          {chat?.id && (
             <IconButton
               size="large"
               color="warning"
-              onClick={() => onDeleteChat(curChat.id)}
+              onClick={() => onDeleteChat(chat.id)}
             >
               <DeleteIcon />
             </IconButton>
           )}
-          {/* {curChat?.id && (
+          {/* {chat?.id && (
             <IconButton size="large" color="success">
               <ShareIcon />
             </IconButton>

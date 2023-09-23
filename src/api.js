@@ -6,35 +6,29 @@ const BASE_URL =
     : process.env.PUBLIC_URL;
 const API_KEY_KEY = "llmchat:apiKey";
 
-export function useDefaultPersistentGet(key, path, extraParams = "unused=1") {
-  const fullKey = "llmchat:" + key;
-  const [values, setValues] = React.useState(
-    JSON.parse(localStorage.getItem(fullKey))
-  );
+export function useGet(path, extraParams = "") {
+  const [values, setValues] = React.useState(null);
   const [loading, setLoading] = React.useState(true);
   React.useEffect(() => {
-    const store = localStorage.getItem(fullKey);
     setLoading(true);
-    fetch(
-      `${BASE_URL}/.netlify/functions${path}?apiKey=${localStorage.getItem(
-        API_KEY_KEY
-      )}&${extraParams}`
-    )
+    let url = `${BASE_URL}/.netlify/functions${path}?apiKey=${localStorage.getItem(
+      API_KEY_KEY
+    )}`;
+    if (extraParams) {
+      url += `&${extraParams}`;
+    }
+    fetch(url)
       .then((resp) => resp.json())
       .then((values) => {
         setValues(values);
-        localStorage.setItem(fullKey, JSON.stringify(values));
         setLoading(false);
       })
       .catch(() => {
-        setValues(JSON.parse(store));
         setLoading(false);
       });
-  }, [path, fullKey, extraParams]);
-  const setValue = (newValue) => {
-    const newValueComputed = newValue(values);
-    setValues(newValueComputed);
-    localStorage.setItem(fullKey, JSON.stringify(newValueComputed));
+  }, [path, extraParams]);
+  const setValue = (newValueFunc) => {
+    setValues(newValueFunc);
   };
   return [loading, values, setValue];
 }

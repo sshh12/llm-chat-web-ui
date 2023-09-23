@@ -4,59 +4,60 @@ import HistoryDrawer from "./HistoryDrawer";
 import Box from "@mui/material/Box";
 import CssBaseline from "@mui/material/CssBaseline";
 import TopBar from "./TopBar";
-import { useDefaultPersistentGet, useUpdate } from "../api";
+import { useGet, useUpdate } from "../api";
 import SettingsDialog, { fixSettings } from "./SettingsDialog";
 
 function ChatView({ theme }) {
   const urlChatID =
     new URLSearchParams(window.location.search).get("chatId") || null;
   const [historyOpen, setHistoryOpen] = React.useState(false);
-  const [curChatId, setCurChatId] = React.useState(urlChatID);
+  const [chatId, setChatId] = React.useState(urlChatID);
   const [generating, setGenerating] = React.useState(false);
   const [openSettings, setOpenSettings] = React.useState(false);
 
-  const [loadingUser, user, setUser] = useDefaultPersistentGet(
-    "user",
-    "/get-user"
-  );
-  const [loadingChat, curChat, setCurChat] = useDefaultPersistentGet(
-    "chat:" + curChatId,
-    "/get-chat",
-    "chatId=" + curChatId
-  );
+  const [loadingUser, user, setUser] = useGet("/get-user");
+  const [loadingChat, _chat, setChat] = useGet("/get-chat", "chatId=" + chatId);
   const [updateChat, loadingUpdateChat] = useUpdate("/update-chat");
   const [updateUser, loadingUpdateUser] = useUpdate("/update-user");
   const loading =
     loadingUser || loadingChat || loadingUpdateChat || loadingUpdateUser;
-
+  const chat = Object.assign({}, _chat, {
+    messages: _chat?.messages || [],
+  });
   const settings = fixSettings(
-    Object.assign({}, user?.chatSettings || {}, curChat?.chatSettings || {})
+    Object.assign({}, user?.chatSettings || {}, chat?.chatSettings || {})
   );
 
-  const onChatUpdate = (messages) => {
-    updateChat({
-      id: curChatId,
-      messages: messages,
-      chatSettings: settings,
-    }).then((chat) => {
-      setCurChatId(chat.id);
-      setCurChat(() => chat);
-      window.history.pushState({}, "", "?chatId=" + chat.id);
-      setUser((user) => ({
-        ...user,
-        chats: user.chats.filter((c) => c.id !== chat.id).concat([chat]),
-      }));
+  const appendMessage = (message) => {
+    setChat((chat) => {
+      const newChat = {
+        id: chat.id,
+        messages: chat.messages.concat([message]),
+        chatSettings: settings,
+      };
+      updateChat(newChat).then((newChatRemote) => {
+        setChatId(newChatRemote.id);
+        setChat(newChatRemote);
+        window.history.pushState({}, "", "?chatId=" + newChatRemote.id);
+        setUser((user) => ({
+          ...user,
+          chats: user.chats
+            .filter((c) => c.id !== newChatRemote.id)
+            .concat([newChatRemote]),
+        }));
+      });
+      return newChat;
     });
   };
 
   const onSelectChat = (chatId) => {
-    setCurChatId(chatId);
+    setChatId(chatId);
     window.history.pushState({}, "", "?chatId=" + chatId);
   };
 
   const onDeleteChat = (chatId) => {
-    updateChat({ id: curChatId, doDelete: true }).then((chat) => {
-      setCurChatId(null);
+    updateChat({ id: chatId, doDelete: true }).then((chat) => {
+      setChatId(null);
       window.history.pushState({}, "", "/");
       setUser((user) => ({
         ...user,
@@ -66,14 +67,14 @@ function ChatView({ theme }) {
   };
 
   const onNewChat = () => {
-    setCurChatId(null);
+    setChatId(null);
     window.history.pushState({}, "", "/");
   };
 
   const onUpdatedSettings = (settings, setDefault) => {
-    setCurChat((chat) => ({ ...chat, chatSettings: settings }));
-    if (curChatId !== null) {
-      updateChat({ id: curChatId, chatSettings: settings });
+    setChat((chat) => ({ ...chat, chatSettings: settings }));
+    if (chatId !== null) {
+      updateChat({ id: chatId, chatSettings: settings });
     }
     if (setDefault) {
       setUser((user) => ({ ...user, chatSettings: settings }));
@@ -89,7 +90,7 @@ function ChatView({ theme }) {
         generating={generating}
         historyOpen={historyOpen}
         handleDrawerOpen={() => setHistoryOpen(true)}
-        curChat={curChat}
+        chat={chat}
         onDeleteChat={onDeleteChat}
         onNewChat={onNewChat}
         user={user}
@@ -100,7 +101,7 @@ function ChatView({ theme }) {
         theme={theme}
         user={user}
         onSelectChat={onSelectChat}
-        selectedChatId={curChatId}
+        selectedChatId={chatId}
       />
       <SettingsDialog
         settings={settings}
@@ -110,8 +111,8 @@ function ChatView({ theme }) {
       />
       <Chat
         historyOpen={historyOpen}
-        onChatUpdate={onChatUpdate}
-        curChat={curChat}
+        appendMessage={appendMessage}
+        chat={chat}
         setGenerating={setGenerating}
         setOpenSettings={setOpenSettings}
         settings={settings}

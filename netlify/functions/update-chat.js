@@ -34,28 +34,31 @@ exports.handler = async (event, context) => {
     where: { apiKey: apiKey },
   });
   let chat;
+  let chatMessages = messages;
   if (id === null) {
     chat = await prisma.chat.create({
       data: {
         id: ulid(),
-        name: await getChatTitle(messages),
+        name: "",
         userId: user.id,
+        chatSettings: chatSettings,
       },
     });
     await prisma.message.createMany({
       data: messages.map((message) => ({
         role: message.role,
-        text: message.content,
+        text: message.text,
         chatId: chat.id,
       })),
     });
   } else {
     chat = await prisma.chat.findFirst({
       where: { id },
-      include: { user: true },
+      include: { user: true, messages: true },
     });
-    if (chat.user.apiKey !== apiKey)
+    if (chat.user.apiKey !== apiKey) {
       return { statusCode: 403, body: "Not authorized" };
+    }
     if (doDelete) {
       await prisma.message.deleteMany({
         where: { chatId: id },
@@ -63,22 +66,33 @@ exports.handler = async (event, context) => {
       await prisma.chat.delete({
         where: { id },
       });
-    } else if (chatSettings) {
-      await prisma.chat.update({
-        where: { id },
-        data: { chatSettings: chatSettings },
-      });
     } else {
-      await prisma.message.deleteMany({
-        where: { chatId: id },
-      });
-      await prisma.message.createMany({
-        data: messages.map((message) => ({
-          role: message.role,
-          text: message.content,
-          chatId: chat.id,
-        })),
-      });
+      if (chatSettings) {
+        await prisma.chat.update({
+          where: { id },
+          data: { chatSettings: chatSettings },
+        });
+      }
+      if (messages) {
+        await prisma.message.deleteMany({
+          where: { chatId: id },
+        });
+        await prisma.message.createMany({
+          data: messages.map((message) => ({
+            role: message.role,
+            text: message.text,
+            chatId: chat.id,
+          })),
+        });
+        if (messages.length === 2) {
+          const newName = await getChatTitle(messages);
+          await prisma.chat.update({
+            where: { id },
+            data: { name: newName },
+          });
+          chat.name = newName;
+        }
+      }
     }
   }
   return {
@@ -87,7 +101,7 @@ exports.handler = async (event, context) => {
       {
         id: chat.id,
         name: chat.name,
-        messages: chat.messages,
+        messages: chatMessages,
         chatSettings: chat.chatSettings,
         createdAt: chat.createdAt,
       },

@@ -44,37 +44,30 @@ const Main = styled(
 
 function Chat({
   historyOpen,
-  onChatUpdate,
-  curChat,
+  appendMessage,
+  chat,
   setGenerating,
   setOpenSettings,
   settings,
 }) {
   const [message, setMessage] = React.useState("");
   const [loading, setLoading] = React.useState(false);
-  const [chat, setChat] = React.useState([]);
+  const [latestChat, setLatestChat] = React.useState(null);
   const [alert, setAlert] = React.useState(null);
 
-  React.useEffect(() => {
-    if (curChat?.messages) {
-      setChat(
-        curChat.messages.map((message) => ({
-          content: message.text,
-          role: message.role,
-        }))
-      );
-    }
-  }, [curChat]);
-
   const submitMessage = () => {
-    const chatQuery = [...chat, { role: "user", content: message }];
-    setChat([
-      ...chat,
+    const chatQuery = [
+      ...chat.messages.map((c) => ({ role: c.role, content: c.text })),
       { role: "user", content: message },
-      { role: "assistant", content: "" },
-    ]);
-    const index = chat.length + 1;
-    let updatedChat;
+    ];
+    appendMessage({
+      role: "user",
+      text: message,
+    });
+    setLatestChat({
+      role: "assistant",
+      text: "",
+    });
     setLoading(true);
     setGenerating(true);
     setTimeout(() => {
@@ -84,21 +77,18 @@ function Chat({
         settings,
         (content, alert) => {
           setAlert(alert);
-          setChat((chat) => {
-            const newChat = [...chat];
-            newChat[index] = {
-              role: "assistant",
-              content: content,
-            };
-            if (index === chat.length - 1) {
-              window.scrollBy(0, 1000);
-            }
-            updatedChat = newChat;
-            return newChat;
+          window.scrollBy(0, 1000);
+          setLatestChat({
+            role: "assistant",
+            text: content,
           });
         },
-        () => {
-          onChatUpdate(updatedChat);
+        (content) => {
+          appendMessage({
+            role: "assistant",
+            text: content,
+          });
+          setLatestChat(null);
           setAlert(null);
           setLoading(false);
           setGenerating(false);
@@ -108,14 +98,19 @@ function Chat({
     setMessage("");
   };
 
+  let messages = [...chat.messages];
+  if (latestChat !== null) {
+    messages.push(latestChat);
+  }
+
   return (
     <Main open={historyOpen}>
       <DrawerHeader />
-      {chat.map((chatMessage, i) => (
+      {messages.map((chatMessage, i) => (
         <ChatMessage
           key={i}
           chatMessage={chatMessage}
-          alert={i === chat.length - 1 ? alert : null}
+          alert={i === messages.length - 1 ? alert : null}
         />
       ))}
       <Box height={"9rem"}></Box>

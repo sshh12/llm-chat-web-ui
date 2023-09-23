@@ -22,8 +22,7 @@ const MODELS = [
   "vllm_hf:meta-llama/Llama-2-13b-chat-hf",
 ];
 
-const DEFAULT_SYSTEM_PROMPT = `You are Chat LLM, an expert large language model.
-Current date and time: {{ datetime }}, you are talking to {{ name }}. Use markdown in your response.`;
+const DEFAULT_SYSTEM_PROMPT = `You are Chat LLM, an expert large language model. Current date and time: {{ datetime }}, you are talking to {{ name }}. Use markdown in your response.`;
 
 export function fixSettings(settings) {
   if (settings === null) {

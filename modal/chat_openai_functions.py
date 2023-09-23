@@ -162,13 +162,13 @@ class OpenAIFunctionsAPIModel:
                 func = [
                     f[1] for f in FUNCTIONS if f[0]["name"] == function_call["name"]
                 ][0]
+                yield json.dumps({"alert": f"Using {function_call['name']}"}) + "\n"
                 result = func(**func_args)
                 print(function_call["name"], "->", result)
                 cur_messages.append(resp["choices"][0]["message"])
                 cur_messages.append(
                     dict(role="function", content=result, name=function_call["name"])
                 )
-                yield json.dumps({"alert": f"Using {function_call['name']}"}) + "\n"
             else:
                 break
 

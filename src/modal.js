@@ -45,6 +45,6 @@ export function streamGenerate(chatQuery, settings, onContent, onComplete) {
         endOfMessageIndex = result.indexOf("\n");
       }
     }
-    onComplete();
+    onComplete(content, alert);
   });
 }

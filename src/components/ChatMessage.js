@@ -60,7 +60,7 @@ export default function ChatMessage({ chatMessage, alert }) {
           <ReactMarkdown
             className="chat-markdown"
             style={{ overflow: "hidden" }}
-            children={chatMessage.content}
+            children={chatMessage.text}
             remarkPlugins={[remarkGfm]}
             components={{
               code({ node, inline, className, children, ...props }) {
