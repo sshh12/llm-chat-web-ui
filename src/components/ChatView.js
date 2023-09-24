@@ -82,6 +82,15 @@ function ChatView({ theme }) {
     }
   };
 
+  const resetChat = (idx) => {
+    const newChat = {
+      id: chat.id,
+      messages: chat.messages.slice(0, idx),
+      chatSettings: settings,
+    };
+    setChat(newChat);
+  };
+
   return (
     <Box sx={{ display: "flex" }}>
       <CssBaseline />
@@ -116,6 +125,7 @@ function ChatView({ theme }) {
         setGenerating={setGenerating}
         setOpenSettings={setOpenSettings}
         settings={settings}
+        resetChat={resetChat}
       />
     </Box>
   );

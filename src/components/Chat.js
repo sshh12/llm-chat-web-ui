@@ -49,20 +49,21 @@ function Chat({
   setGenerating,
   setOpenSettings,
   settings,
+  resetChat,
 }) {
   const [message, setMessage] = React.useState("");
   const [loading, setLoading] = React.useState(false);
   const [latestChat, setLatestChat] = React.useState(null);
   const [alert, setAlert] = React.useState(null);
 
-  const submitMessage = () => {
+  const submitMessage = (newUserMessage) => {
     const chatQuery = [
       ...chat.messages.map((c) => ({ role: c.role, content: c.text })),
-      { role: "user", content: message },
+      { role: "user", content: newUserMessage },
     ];
     appendMessage({
       role: "user",
-      text: message,
+      text: newUserMessage,
     });
     setLatestChat({
       role: "assistant",
@@ -110,7 +111,14 @@ function Chat({
         <ChatMessage
           key={i}
           chatMessage={chatMessage}
+          loading={loading}
           alert={i === messages.length - 1 ? alert : null}
+          onUpdateText={(text) => {
+            resetChat(i);
+            setTimeout(() => {
+              submitMessage(text);
+            }, 100);
+          }}
         />
       ))}
       <Box height={"9rem"}></Box>
@@ -136,7 +144,7 @@ function Chat({
           onKeyDown={(e) => {
             if (e.keyCode === 13 && !e.ctrlKey && !loading) {
               e.preventDefault();
-              submitMessage();
+              submitMessage(message);
             }
           }}
         />
@@ -144,7 +152,7 @@ function Chat({
         <Stack>
           <IconButton
             color="primary"
-            onClick={submitMessage}
+            onClick={() => submitMessage(message)}
             disabled={loading || message.length === 0}
           >
             <SendIcon sx={{ fontSize: "2rem" }} />
