@@ -60,10 +60,10 @@ function HistoryDrawer({
           <ListItem key={chat.id} disablePadding>
             <ListItemButton onClick={() => onSelectChat(chat.id)}>
               {selectedChatId === chat.id && (
-                <ListItemText primary={<b>{chat.name}</b>} />
+                <ListItemText primary={<b>{chat.name || "(untitled)"}</b>} />
               )}
               {selectedChatId !== chat.id && (
-                <ListItemText primary={chat.name} />
+                <ListItemText primary={chat.name || "(untitled)"} />
               )}
             </ListItemButton>
           </ListItem>
