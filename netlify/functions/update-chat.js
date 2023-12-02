@@ -76,7 +76,7 @@ exports.handler = async (event, context) => {
       if (chatSettings) {
         newData.chatSettings = chatSettings;
       }
-      if (isPublic) {
+      if (isPublic !== undefined) {
         newData.public = isPublic;
       }
       if (newData) {

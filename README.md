@@ -26,8 +26,9 @@ This comes at the cost of:
 - Easy to add arbitrary plugins/functions/agents
 - Easy to add hugging face open source transformers
 - OpenAI API streaming
-- Image generation (StableDiffusion XL + DALLE)
+- Image generation (StableDiffusion XL, DALLE)
 - Automatic chat title generation
+- Sharable links (when you make a chat public)
 
 ## Setup
 
