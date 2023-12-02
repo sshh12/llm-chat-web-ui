@@ -3,6 +3,7 @@ import json
 import modal
 
 from modal_base import image_base, stub, Message
+from fs_tools import upload_image
 
 
 @stub.cls(
@@ -16,6 +17,8 @@ class DALLEChatModel:
     @modal.method()
     def generate(self, chat: List[Message]):
         from openai import OpenAI
+        from PIL import Image
+        import requests
 
         client = OpenAI()
 
@@ -31,7 +34,10 @@ class DALLEChatModel:
             n=1,
         )
 
-        image_url = response.data[0].url
+        raw_image_url = response.data[0].url
+        image_url = upload_image(
+            Image.open(requests.get(raw_image_url, stream=True).raw)
+        )
 
         resp = f"![{prompt}]({image_url})"
 

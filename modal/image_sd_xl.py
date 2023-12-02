@@ -1,7 +1,7 @@
 import modal
 
 from modal_base import stub
-from image_tools import upload_to_imgur
+from fs_tools import upload_image
 
 CACHE_DIR = "/root/cache"
 
@@ -100,11 +100,6 @@ class StableDiffusionModel:
             generator=generator,
         ).images[0]
 
-        import io
-
-        byte_stream = io.BytesIO()
-        image.save(byte_stream, format="PNG")
-        image_bytes = byte_stream.getvalue()
-        url = upload_to_imgur(image_bytes)
+        url = upload_image(image)
 
         return [url]

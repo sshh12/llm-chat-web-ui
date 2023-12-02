@@ -59,8 +59,13 @@ OPENAI_API_KEY (from openai)
 
 # Semi Optional
 SERPER_API_KEY (from https://serper.dev/)
-IMGUR_CLIENT_ID (from imgur, required for image generation)
 WOLFRAM_ALPHA_APPID (https://developer.wolframalpha.com/)
+
+# Semi Optional File Storage (uses imgur if provided or falls back to s3)
+IMGUR_CLIENT_ID
+AWS_ACCESS_KEY_ID
+AWS_SECRET_ACCESS_KEY
+AWS_BUCKET_NAME
 ```
 
 8. Deploy modal `cd modal && modal deploy modalapp`
