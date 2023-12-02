@@ -19,6 +19,7 @@ import { atomDark as dark } from "react-syntax-highlighter/dist/esm/styles/prism
 
 export default function ChatMessage({
   chatMessage,
+  canEdit,
   alert,
   onUpdateText,
   loading,
@@ -63,7 +64,7 @@ export default function ChatMessage({
           </Typography>
           {!showEdit && (
             <Box>
-              {!loading && chatMessage.role === "user" && (
+              {canEdit && !loading && chatMessage.role === "user" && (
                 <IconButton
                   size="small"
                   color="primary"

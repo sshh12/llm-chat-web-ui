@@ -7,6 +7,7 @@ import MenuIcon from "@mui/icons-material/Menu";
 import AddIcon from "@mui/icons-material/Add";
 import Stack from "@mui/material/Stack";
 import DeleteIcon from "@mui/icons-material/Delete";
+import ShareIcon from "@mui/icons-material/Share";
 import LinearProgress from "@mui/material/LinearProgress";
 
 const drawerWidth = 240;
@@ -31,6 +32,7 @@ const AppBarStyled = styled(AppBar, {
 function TopBar({
   historyOpen,
   handleDrawerOpen,
+  handleShareOpen,
   chat,
   onDeleteChat,
   onNewChat,
@@ -41,19 +43,21 @@ function TopBar({
   return (
     <AppBarStyled position="fixed" open={historyOpen}>
       <Toolbar>
-        <IconButton
-          color="inherit"
-          onClick={handleDrawerOpen}
-          edge="start"
-          sx={{ mr: 2, ...(historyOpen && { display: "none" }) }}
-        >
-          <MenuIcon />
-        </IconButton>
+        {!chat.isGuest && (
+          <IconButton
+            color="inherit"
+            onClick={handleDrawerOpen}
+            edge="start"
+            sx={{ mr: 2, ...(historyOpen && { display: "none" }) }}
+          >
+            <MenuIcon />
+          </IconButton>
+        )}
         <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
           {chat?.name || "Chat"}
         </Typography>
         <Stack direction="row" spacing={0} edge="end">
-          {chat?.id && (
+          {!chat.isGuest && chat?.id && (
             <IconButton
               size="large"
               color="warning"
@@ -62,12 +66,12 @@ function TopBar({
               <DeleteIcon />
             </IconButton>
           )}
-          {/* {chat?.id && (
-            <IconButton size="large" color="success">
+          {!chat.isGuest && chat?.id && (
+            <IconButton size="large" color="success" onClick={handleShareOpen}>
               <ShareIcon />
             </IconButton>
-          )} */}
-          {user && (
+          )}
+          {!chat.isGuest && user && (
             <IconButton
               color="primary"
               size="large"

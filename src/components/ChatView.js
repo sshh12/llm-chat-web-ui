@@ -6,6 +6,7 @@ import CssBaseline from "@mui/material/CssBaseline";
 import TopBar from "./TopBar";
 import { useGet, useUpdate } from "../api";
 import SettingsDialog, { fixSettings } from "./SettingsDialog";
+import ShareDialog from "./ShareDialog";
 
 function ChatView({ theme }) {
   const urlChatID =
@@ -14,6 +15,7 @@ function ChatView({ theme }) {
   const [chatId, setChatId] = React.useState(urlChatID);
   const [generating, setGenerating] = React.useState(false);
   const [openSettings, setOpenSettings] = React.useState(false);
+  const [openShare, setOpenShare] = React.useState(false);
 
   const [loadingUser, user, setUser] = useGet("/get-user");
   const [loadingChat, _chat, setChat] = useGet("/get-chat", "chatId=" + chatId);
@@ -91,6 +93,13 @@ function ChatView({ theme }) {
     setChat(newChat);
   };
 
+  const setPublic = (isPublic) => {
+    if (chatId !== null) {
+      setChat((chat) => ({ ...chat, public: isPublic }));
+      updateChat({ id: chatId, public: isPublic });
+    }
+  };
+
   return (
     <Box sx={{ display: "flex" }}>
       <CssBaseline />
@@ -99,6 +108,7 @@ function ChatView({ theme }) {
         generating={generating}
         historyOpen={historyOpen}
         handleDrawerOpen={() => setHistoryOpen(true)}
+        handleShareOpen={() => setOpenShare(true)}
         chat={chat}
         onDeleteChat={onDeleteChat}
         onNewChat={onNewChat}
@@ -117,6 +127,12 @@ function ChatView({ theme }) {
         onUpdatedSettings={onUpdatedSettings}
         open={openSettings}
         setOpen={setOpenSettings}
+      />
+      <ShareDialog
+        open={openShare}
+        setOpen={setOpenShare}
+        setPublic={setPublic}
+        isPublic={chat?.public}
       />
       <Chat
         historyOpen={historyOpen}

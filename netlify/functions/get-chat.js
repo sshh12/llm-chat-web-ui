@@ -4,7 +4,6 @@ const prisma = new PrismaClient();
 
 exports.handler = async (event, context) => {
   const { apiKey, chatId } = event.queryStringParameters;
-  if (!apiKey) return { statusCode: 400, body: "No API key provided" };
   if (!chatId || chatId === "null") {
     return {
       statusCode: 200,
@@ -20,8 +19,9 @@ exports.handler = async (event, context) => {
     where: { id: chatId },
     include: { messages: true, user: true },
   });
-  if (chat.user.apiKey !== apiKey)
+  if (chat.user.apiKey !== apiKey && !chat.public)
     return { statusCode: 403, body: "Not authorized" };
+  const isGuest = chat.user.apiKey !== apiKey;
   return {
     statusCode: 200,
     body: JSON.stringify(
@@ -31,6 +31,8 @@ exports.handler = async (event, context) => {
         messages: chat.messages,
         chatSettings: chat.chatSettings,
         createdAt: chat.createdAt,
+        public: chat.public,
+        isGuest: isGuest,
       },
       (_key, value) => (typeof value === "bigint" ? value.toString() : value)
     ),

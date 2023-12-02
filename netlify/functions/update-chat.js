@@ -26,9 +26,14 @@ const getChatTitle = async (messages) => {
 };
 
 exports.handler = async (event, context) => {
-  const { apiKey, id, messages, chatSettings, doDelete } = JSON.parse(
-    event.body
-  );
+  const {
+    apiKey,
+    id,
+    messages,
+    chatSettings,
+    doDelete,
+    public: isPublic,
+  } = JSON.parse(event.body);
   if (!apiKey) return { statusCode: 400, body: "No API key provided" };
   const user = await prisma.user.findFirst({
     where: { apiKey: apiKey },
@@ -67,10 +72,17 @@ exports.handler = async (event, context) => {
         where: { id },
       });
     } else {
+      const newData = {};
       if (chatSettings) {
+        newData.chatSettings = chatSettings;
+      }
+      if (isPublic) {
+        newData.public = isPublic;
+      }
+      if (newData) {
         await prisma.chat.update({
           where: { id },
-          data: { chatSettings: chatSettings },
+          data: newData,
         });
       }
       if (messages) {
@@ -104,6 +116,7 @@ exports.handler = async (event, context) => {
         messages: chatMessages,
         chatSettings: chat.chatSettings,
         createdAt: chat.createdAt,
+        public: chat.public,
       },
       (_key, value) => (typeof value === "bigint" ? value.toString() : value)
     ),

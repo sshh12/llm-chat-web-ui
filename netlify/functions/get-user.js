@@ -4,7 +4,16 @@ const prisma = new PrismaClient();
 
 exports.handler = async (event, context) => {
   const { apiKey } = event.queryStringParameters;
-  if (!apiKey) return { statusCode: 400, body: "No API key provided" };
+  if (!apiKey || apiKey === "null")
+    return {
+      statusCode: 200,
+      body: JSON.stringify(
+        {
+          isGuest: true,
+        },
+        (_key, value) => (typeof value === "bigint" ? value.toString() : value)
+      ),
+    };
   const user = await prisma.user.findFirst({
     where: { apiKey: apiKey },
     include: { chats: true },
@@ -12,7 +21,12 @@ exports.handler = async (event, context) => {
   return {
     statusCode: 200,
     body: JSON.stringify(
-      { name: user.name, chats: user.chats, chatSettings: user.chatSettings },
+      {
+        name: user.name,
+        chats: user.chats,
+        chatSettings: user.chatSettings,
+        isGuest: false,
+      },
       (_key, value) => (typeof value === "bigint" ? value.toString() : value)
     ),
   };

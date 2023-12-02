@@ -110,6 +110,7 @@ function Chat({
       {messages.map((chatMessage, i) => (
         <ChatMessage
           key={i}
+          canEdit={!chat.isGuest}
           chatMessage={chatMessage}
           loading={loading}
           alert={i === messages.length - 1 ? alert : null}
@@ -121,52 +122,59 @@ function Chat({
           }}
         />
       ))}
-      <Box height={"9rem"}></Box>
-      <Paper
-        elevation={2}
-        sx={{
-          p: "9px 7px",
-          display: "flex",
-          alignItems: "center",
-          width: "100%",
-          position: "fixed",
-          bottom: 0,
-        }}
-      >
-        <TextField
-          label="Message"
-          fullWidth
-          multiline
-          rows={4}
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-          placeholder="Enter a message here..."
-          onKeyDown={(e) => {
-            if (
-              settings.submitOnEnter &&
-              e.keyCode === 13 &&
-              !e.ctrlKey &&
-              !loading
-            ) {
-              e.preventDefault();
-              submitMessage(message);
-            }
-          }}
-        />
-        <Divider orientation="vertical" />
-        <Stack>
-          <IconButton
-            color="primary"
-            onClick={() => submitMessage(message)}
-            disabled={loading || message.length === 0}
+      {!chat.isGuest && (
+        <>
+          <Box height={"9rem"}></Box>
+          <Paper
+            elevation={2}
+            sx={{
+              p: "9px 7px",
+              display: "flex",
+              alignItems: "center",
+              width: "100%",
+              position: "fixed",
+              bottom: 0,
+            }}
           >
-            <SendIcon sx={{ fontSize: "2rem" }} />
-          </IconButton>
-          <IconButton color="secondary" onClick={() => setOpenSettings(true)}>
-            <SettingsApplicationsIcon />
-          </IconButton>
-        </Stack>
-      </Paper>
+            <TextField
+              label="Message"
+              fullWidth
+              multiline
+              rows={4}
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              placeholder="Enter a message here..."
+              onKeyDown={(e) => {
+                if (
+                  settings.submitOnEnter &&
+                  e.keyCode === 13 &&
+                  !e.ctrlKey &&
+                  !loading
+                ) {
+                  e.preventDefault();
+                  submitMessage(message);
+                }
+              }}
+            />
+            <Divider orientation="vertical" />
+            <Stack>
+              <IconButton
+                color="primary"
+                onClick={() => submitMessage(message)}
+                disabled={loading || message.length === 0}
+              >
+                <SendIcon sx={{ fontSize: "2rem" }} />
+              </IconButton>
+              <IconButton
+                color="secondary"
+                onClick={() => setOpenSettings(true)}
+              >
+                <SettingsApplicationsIcon />
+              </IconButton>
+            </Stack>
+          </Paper>
+        </>
+      )}
     </Main>
   );
 }
