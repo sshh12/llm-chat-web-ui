@@ -25,6 +25,8 @@
   },
   "scripts": {
     "start": "react-scripts start",
+    "functions": "netlify functions:serve",
+    "deploy": "cd modal && modal deploy modalapp",
     "build": "react-scripts build && prisma generate --generator client"
   },
   "eslintConfig": {

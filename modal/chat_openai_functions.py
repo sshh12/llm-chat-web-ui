@@ -1,8 +1,10 @@
 from typing import List
+import json
+import asyncio
 import modal
 
 from modal_base import image_base, stub, Message
-from image_generation import StableDiffusionModel
+from chat_dalle import DALLEChatModel
 
 
 def search(query: str, k: int = 10):
@@ -76,7 +78,15 @@ def run_wolframalpha(query: str):
 
 
 def generate_image(prompt: str):
-    return repr(StableDiffusionModel.inference.remote(prompt))
+    model = DALLEChatModel(model="dall-e-3")
+
+    def _gen_image():
+        for item in model.generate.remote_gen([Message(role="user", content=prompt)]):
+            item_json = json.loads(item.strip())
+            if "content" in item_json:
+                return item_json["content"]
+
+    return _gen_image()
 
 
 FUNCTIONS = [
@@ -140,13 +150,15 @@ class OpenAIFunctionsAPIModel:
 
     @modal.method()
     def generate(self, chat: List[Message]):
-        import openai
+        from openai import OpenAI
         import json
+
+        client = OpenAI()
 
         args = dict(
             model=self.model,
             temperature=self.temperature,
-            functions=[f[0] for f in FUNCTIONS],
+            tools=[{"type": "function", "function": f[0]} for f in FUNCTIONS],
         )
         print(args)
 
@@ -156,20 +168,27 @@ class OpenAIFunctionsAPIModel:
         )
 
         while True:
-            resp = openai.ChatCompletion.create(messages=cur_messages, **args)
-            if function_call := resp["choices"][0]["message"].get("function_call"):
-                func_args = json.loads(function_call["arguments"])
-                func = [
-                    f[1] for f in FUNCTIONS if f[0]["name"] == function_call["name"]
-                ][0]
-                yield json.dumps({"alert": f"Using {function_call['name']}"}) + "\n"
+            resp = client.chat.completions.create(messages=cur_messages, **args)
+            tool_calls = resp.choices[0].message.tool_calls
+            if tool_calls is not None and len(tool_calls) > 0:
+                function_call = tool_calls[0].function
+                func_args = json.loads(function_call.arguments)
+                func = [f[1] for f in FUNCTIONS if f[0]["name"] == function_call.name][
+                    0
+                ]
+                yield json.dumps({"alert": f"Using {function_call.name}"}) + "\n"
                 result = func(**func_args)
-                print(function_call["name"], "->", result)
-                cur_messages.append(resp["choices"][0]["message"])
+                print(function_call.name, "->", result)
+                cur_messages.append(resp.choices[0].message)
                 cur_messages.append(
-                    dict(role="function", content=result, name=function_call["name"])
+                    dict(
+                        role="tool",
+                        content=result,
+                        name=function_call.name,
+                        tool_call_id=tool_calls[0].id,
+                    )
                 )
             else:
                 break
 
-        yield json.dumps({"content": resp["choices"][0]["message"]["content"]}) + "\n"
+        yield json.dumps({"content": resp.choices[0].message.content}) + "\n"

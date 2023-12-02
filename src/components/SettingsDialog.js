@@ -11,13 +11,20 @@ import FormControl from "@mui/material/FormControl";
 import Slider from "@mui/material/Slider";
 import Typography from "@mui/material/Typography";
 import TextField from "@mui/material/TextField";
+import Checkbox from "@mui/material/Checkbox";
 import Box from "@mui/material/Box";
 
 const MODELS = [
   "openai_functions:gpt-4",
   "openai_functions:gpt-3.5-turbo",
+  "openai_functions:gpt-3.5-turbo-16k",
+  "openai_functions:gpt-4-1106-preview",
   "openai:gpt-4",
+  "openai:gpt-4-1106-preview",
   "openai:gpt-3.5-turbo",
+  "openai:gpt-3.5-turbo-16k",
+  "dalle:dall-e-3",
+  "dalle:dall-e-2",
   "stablediffusion:xl",
   "vllm_hf:meta-llama/Llama-2-13b-chat-hf",
 ];
@@ -36,6 +43,9 @@ export function fixSettings(settings) {
   }
   if (!settings.systemPrompt) {
     settings.systemPrompt = DEFAULT_SYSTEM_PROMPT;
+  }
+  if (settings.submitOnEnter === undefined) {
+    settings.submitOnEnter = true;
   }
   return settings;
 }
@@ -99,6 +109,20 @@ export default function SettingsDialog({
               }}
               step={0.1}
               max={1.0}
+            />
+          </Box>
+          <Box sx={{ paddingTop: "1rem" }}>
+            <Typography gutterBottom sx={{ fontSize: 12, color: "#eee" }}>
+              Submit On Enter
+            </Typography>
+            <Checkbox
+              checked={settings.submitOnEnter}
+              onChange={(e) => {
+                onUpdatedSettings(
+                  { ...settings, submitOnEnter: e.target.checked },
+                  false
+                );
+              }}
             />
           </Box>
         </DialogContent>

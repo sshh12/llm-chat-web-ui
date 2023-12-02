@@ -8,6 +8,7 @@ from chat_openai import OpenAIAPIModel
 from chat_vllm_hf import VLLMHFModel
 from chat_openai_functions import OpenAIFunctionsAPIModel
 from chat_stablediffusion import StableDiffusionChatModel
+from chat_dalle import DALLEChatModel
 
 
 class GenerateArgs(BaseModel):
@@ -47,6 +48,8 @@ async def generate(args: GenerateArgs):
         model = OpenAIFunctionsAPIModel(
             model_name, temperature=args.temperature, system_prompt=system_prompt
         )
+    elif model_namespace == "dalle":
+        model = DALLEChatModel(model_name)
     elif model_namespace == "stablediffusion":
         model = StableDiffusionChatModel()
     elif model_namespace == "vllm_hf":

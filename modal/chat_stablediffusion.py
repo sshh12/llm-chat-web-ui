@@ -1,10 +1,9 @@
 from typing import List
 import json
-import time
 import modal
 
 from modal_base import image_base, stub, Message
-from image_generation import StableDiffusionModel
+from image_sd_xl import StableDiffusionModel
 
 
 @stub.cls(
@@ -14,7 +13,7 @@ from image_generation import StableDiffusionModel
 class StableDiffusionChatModel:
     @modal.method()
     def generate(self, chat: List[Message]):
-        prompt = chat[-1].content
+        prompt = chat[-1].content.replace("\n", "")
 
         model = StableDiffusionModel()
 

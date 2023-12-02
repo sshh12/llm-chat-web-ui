@@ -28,7 +28,7 @@ export default function ChatMessage({
   const showEdit = editText !== null;
 
   const onCopy = () => {
-    navigator.clipboard.writeText(chatMessage.content);
+    navigator.clipboard.writeText(chatMessage.text);
     setShowCopied(true);
   };
 

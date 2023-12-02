@@ -18,7 +18,9 @@ class OpenAIAPIModel:
 
     @modal.method()
     def generate(self, chat: List[Message]):
-        import openai
+        from openai import OpenAI
+
+        client = OpenAI()
 
         args = dict(
             model=self.model,
@@ -29,8 +31,8 @@ class OpenAIAPIModel:
         )
         print(args)
 
-        resp = openai.ChatCompletion.create(**args)
+        resp = client.chat.completions.create(**args)
         for chunk in resp:
-            chunk_data = chunk["choices"][0]["delta"]
-            yield json.dumps({"content": chunk_data.get("content", "")}) + "\n"
+            chunk_data = chunk.choices[0].delta
+            yield json.dumps({"content": chunk_data.content}) + "\n"
             time.sleep(0.01)
