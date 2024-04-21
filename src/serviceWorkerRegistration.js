@@ -78,6 +78,8 @@ function registerValidSW(swUrl, config) {
               if (config && config.onUpdate) {
                 config.onUpdate(registration);
               }
+              // reload page
+              window.location.reload();
             } else {
               // At this point, everything has been precached.
               // It's the perfect time to display a
