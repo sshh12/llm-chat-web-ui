@@ -9,7 +9,7 @@ import SendIcon from "@mui/icons-material/Send";
 import SettingsApplicationsIcon from "@mui/icons-material/SettingsApplications";
 import Stack from "@mui/material/Stack";
 import ChatMessage from "./ChatMessage.js";
-import { streamGenerate } from "../modal.js";
+import { useBackend } from "../backend.js";
 
 const DrawerHeader = styled("div")(({ theme }) => ({
   display: "flex",
@@ -44,7 +44,7 @@ const Main = styled(
 
 function Chat({
   historyOpen,
-  appendMessage,
+  onChatGenerated,
   chat,
   setGenerating,
   setOpenSettings,
@@ -53,43 +53,53 @@ function Chat({
 }) {
   const [message, setMessage] = React.useState("");
   const [loading, setLoading] = React.useState(false);
-  const [latestChat, setLatestChat] = React.useState(null);
+  const [latestChat, setLatestChat] = React.useState([]);
   const [alert, setAlert] = React.useState(null);
+  const { postStream } = useBackend();
 
-  const submitMessage = (newUserMessage) => {
-    const chatQuery = [
-      ...chat.messages.map((c) => ({ role: c.role, content: c.text })),
+  const submitMessage = (newUserMessage, chatMessages) => {
+    const promptMessages = [
+      ...chatMessages,
       { role: "user", content: newUserMessage },
     ];
-    appendMessage({
-      role: "user",
-      text: newUserMessage,
-    });
-    setLatestChat({
-      role: "assistant",
-      text: "",
-    });
+    setLatestChat([
+      {
+        role: "user",
+        content: newUserMessage,
+      },
+      {
+        role: "assistant",
+        content: "",
+      },
+    ]);
     setLoading(true);
     setGenerating(true);
+    const setLatestContent = (content) => {
+      setLatestChat((latestChat) => {
+        const newLatestChat = [...latestChat];
+        newLatestChat[newLatestChat.length - 1].text = content;
+        return newLatestChat;
+      });
+    };
     setTimeout(() => {
       window.scrollBy(0, 1000);
-      streamGenerate(
-        chatQuery,
-        settings,
-        (content, alert) => {
-          setAlert(alert);
-          window.scrollBy(0, 1000);
-          setLatestChat({
-            role: "assistant",
-            text: content,
-          });
+      postStream(
+        "stream_chat",
+        { id: chat.id || "", messages: promptMessages, settings: settings },
+        (streamData) => {
+          setAlert(streamData.alert || null);
+          setLatestContent(streamData.content || "");
         },
-        (content) => {
-          appendMessage({
-            role: "assistant",
-            text: content,
-          });
-          setLatestChat(null);
+        (streamData) => {
+          onChatGenerated(
+            promptMessages.concat([
+              {
+                role: "assistant",
+                content: streamData.content,
+              },
+            ])
+          );
+          setLatestChat([]);
           setAlert(null);
           setLoading(false);
           setGenerating(false);
@@ -100,8 +110,8 @@ function Chat({
   };
 
   let messages = [...chat.messages];
-  if (latestChat !== null) {
-    messages.push(latestChat);
+  if (latestChat.length > 0) {
+    messages.push(...latestChat);
   }
 
   return (
@@ -115,10 +125,7 @@ function Chat({
           loading={loading}
           alert={i === messages.length - 1 ? alert : null}
           onUpdateText={(text) => {
-            resetChat(i);
-            setTimeout(() => {
-              submitMessage(text);
-            }, 100);
+            resetChat(i).then((chat) => submitMessage(text, chat.messages));
           }}
         />
       ))}
@@ -152,7 +159,7 @@ function Chat({
                   !loading
                 ) {
                   e.preventDefault();
-                  submitMessage(message);
+                  submitMessage(message, chat.messages);
                 }
               }}
             />
@@ -160,7 +167,7 @@ function Chat({
             <Stack>
               <IconButton
                 color="primary"
-                onClick={() => submitMessage(message)}
+                onClick={() => submitMessage(message, chat.messages)}
                 disabled={loading || message.length === 0}
               >
                 <SendIcon sx={{ fontSize: "2rem" }} />

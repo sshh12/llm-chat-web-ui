@@ -1,33 +1,28 @@
-from typing import Dict
+from typing import Dict, List
 from prisma import models
 from fastapi import Response
 from fastapi.responses import StreamingResponse
+from ulid import ULID
+import datetime
 import json
 
+from models.chat_model import Message
+from models.chat_openai import OpenAIModel
 import context
 
 METHODS = {}
 
 
-def method_web():
+def method_web(require_login: bool = True):
     def wrap(func):
         async def wrapper(ctx: context.Context, **kwargs):
-            if not ctx.user:
-                return {"error": "Not logged in"}
+            assert not require_login or ctx.user
             return await func(ctx, **kwargs)
 
         METHODS[func.__name__] = wrapper
+        return func
 
     return wrap
-
-
-"""
-id: _str
-    name: _str
-    messages: Optional[List['models.Message']] = None
-    public: _bool
-    chatSettings: Optional['fields.Json'] = None
-"""
 
 
 def _chat_to_dict(chat: models.Chat) -> dict:
@@ -41,7 +36,7 @@ def _chat_to_dict(chat: models.Chat) -> dict:
     }
     if chat.messages:
         val["messages"] = [
-            {"role": message.role, "text": message.text} for message in chat.messages
+            {"role": message.role, "content": message.text} for message in chat.messages
         ]
     return val
 
@@ -61,13 +56,109 @@ async def get_user(ctx: context.Context) -> Dict:
     return Response(content=json.dumps(resp), media_type="application/json")
 
 
-@method_web()
+@method_web(require_login=False)
 async def get_chat(ctx: context.Context, id: str) -> Dict:
     chat = await ctx.prisma.chat.find_first(
         where={"id": id}, include={"messages": True, "user": True}
     )
-    guest = ctx.user.id != chat.user.id
-    if guest and not chat.public:
-        return {"error": "Chat is private"}
+    guest = ctx.user is None or ctx.user.id != chat.user.id
+    assert (guest and chat.public) or ctx.user.id == chat.user.id
     resp = {**_chat_to_dict(chat), "isGuest": guest}
     return Response(content=json.dumps(resp), media_type="application/json")
+
+
+@method_web()
+async def stream_chat(
+    ctx: context.Context, id: str, messages: List[Dict], settings: Dict
+) -> Dict:
+    if id:
+        chat = await ctx.prisma.chat.find_first(
+            where={"id": id}, include={"messages": True, "user": True}
+        )
+        assert chat and ctx.user.id == chat.user.id
+    msgs = [Message(**m) for m in messages]
+
+    settings["systemPrompt"] = (
+        settings["systemPrompt"]
+        .replace(
+            "{{ datetime }}", datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        )
+        .replace("{{ name }}", ctx.user.name)
+    )
+    print("stream_chat", id, messages, settings)
+    model = OpenAIModel(settings)
+    return StreamingResponse(model.generate(msgs), media_type="text/event-stream")
+
+
+@method_web()
+async def update_chat_messages(
+    ctx: context.Context, id: str, messages: List[Dict], settings: Dict
+) -> Dict:
+    if not id:
+        new_id = str(ULID())
+        chat = await ctx.prisma.chat.create(
+            {
+                "user": {"connect": {"id": ctx.user.id}},
+                "chatSettings": json.dumps(settings),
+                "id": new_id,
+                "name": "New Chat",
+            }
+        )
+        await ctx.prisma.message.create_many(
+            [
+                {"chatId": chat.id, "role": m["role"], "text": m["content"]}
+                for m in messages
+            ]
+        )
+        return await get_chat(ctx, new_id)
+    else:
+        chat = await ctx.prisma.chat.find_first(
+            where={"id": id}, include={"user": True}
+        )
+        assert chat.user.id == ctx.user.id
+        await ctx.prisma.message.delete_many(where={"chatId": id})
+        await ctx.prisma.message.create_many(
+            [{"chatId": id, "role": m["role"], "text": m["content"]} for m in messages]
+        )
+        return await get_chat(ctx, id)
+
+
+@method_web()
+async def update_chat_settings(ctx: context.Context, id: str, settings: Dict) -> Dict:
+    if not id:
+        Response(content=json.dumps({}), media_type="application/json")
+    else:
+        chat = await ctx.prisma.chat.find_first(
+            where={"id": id}, include={"user": True}
+        )
+        assert chat.user.id == ctx.user.id
+        await ctx.prisma.chat.update(
+            where={"id": id}, data={"chatSettings": json.dumps(settings)}
+        )
+        return await get_chat(ctx, id)
+
+
+@method_web()
+async def update_user_settings(ctx: context.Context, settings: Dict) -> Dict:
+    await ctx.prisma.user.update(
+        where={"id": ctx.user.id}, data={"chatSettings": json.dumps(settings)}
+    )
+    resp = {**_user_to_dict(ctx.user), "chatSettings": settings}
+    return Response(content=json.dumps(resp), media_type="application/json")
+
+
+@method_web()
+async def update_chat_public(ctx: context.Context, id: str, public: bool) -> Dict:
+    chat = await ctx.prisma.chat.find_first(where={"id": id}, include={"user": True})
+    assert chat.user.id == ctx.user.id
+    await ctx.prisma.chat.update(where={"id": id}, data={"public": public})
+    return await get_chat(ctx, id)
+
+
+@method_web()
+async def delete_chat(ctx: context.Context, id: str) -> Dict:
+    chat = await ctx.prisma.chat.find_first(where={"id": id}, include={"user": True})
+    assert chat.user.id == ctx.user.id
+    await ctx.prisma.message.delete_many(where={"chatId": id})
+    await ctx.prisma.chat.delete(where={"id": id})
+    return Response(content=json.dumps({}), media_type="application/json")

@@ -3,7 +3,7 @@ import json
 import modal
 
 from modal_base import image_base, stub, Message
-from image_sd_xl import StableDiffusionModel
+from modal.old.image_sd_xl import StableDiffusionModel
 
 
 @stub.cls(

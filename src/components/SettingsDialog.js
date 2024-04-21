@@ -48,10 +48,10 @@ export default function SettingsDialog({
         <DialogTitle>Chat Settings</DialogTitle>
         <DialogContent>
           <FormControl fullWidth sx={{ marginTop: "10px" }}>
-            <InputLabel>Model</InputLabel>
+            <InputLabel>Agent</InputLabel>
             <Select
               value={settings.model}
-              label="Model"
+              label="Agent"
               onChange={(e) => {
                 onUpdatedSettings(
                   { ...settings, model: e.target.value },

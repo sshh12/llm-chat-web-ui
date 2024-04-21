@@ -29,12 +29,12 @@ export default function ChatMessage({
   const showEdit = editText !== null;
 
   const onCopy = () => {
-    navigator.clipboard.writeText(chatMessage.text);
+    navigator.clipboard.writeText(chatMessage.content);
     setShowCopied(true);
   };
 
   const onEdit = () => {
-    if (editText !== chatMessage.text) {
+    if (editText !== chatMessage.content) {
       onUpdateText(editText);
     }
     setEditText(null);
@@ -68,7 +68,7 @@ export default function ChatMessage({
                 <IconButton
                   size="small"
                   color="primary"
-                  onClick={() => setEditText(chatMessage.text)}
+                  onClick={() => setEditText(chatMessage.content)}
                 >
                   <CreateIcon sx={{ fontSize: "1.4rem" }} />
                 </IconButton>
@@ -105,7 +105,7 @@ export default function ChatMessage({
             <ReactMarkdown
               className="chat-markdown"
               style={{ overflow: "hidden" }}
-              children={chatMessage.text}
+              children={chatMessage.content}
               remarkPlugins={[remarkGfm]}
               components={{
                 code({ node, inline, className, children, ...props }) {

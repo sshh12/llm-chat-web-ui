@@ -1,7 +1,7 @@
 import modal
 
 from modal_base import stub
-from fs_tools import upload_image
+from modal.old.fs_tools import upload_image
 
 CACHE_DIR = "/root/cache"
 

@@ -3,7 +3,7 @@ import json
 import modal
 
 from modal_base import image_base, stub, Message
-from fs_tools import upload_image
+from modal.old.fs_tools import upload_image
 
 
 @stub.cls(

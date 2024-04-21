@@ -2,7 +2,7 @@ from typing import List, Dict
 from pydantic import BaseModel
 import modal
 
-from modal_base import image_base, stub, Message
+from modal_base import image_base, stub
 
 
 class BackendArgs(BaseModel):
@@ -14,7 +14,7 @@ class BackendArgs(BaseModel):
 @stub.cls(
     secrets=[modal.Secret.from_name("llm-chat-secret")],
     image=image_base,
-    mounts=[modal.Mount.from_local_python_packages("context", "methods_web")],
+    mounts=[modal.Mount.from_local_python_packages("context", "methods_web", "models")],
     container_idle_timeout=500,
     allow_concurrent_inputs=10,
     cpu=0.25,
@@ -28,7 +28,7 @@ class LLMChatApp:
         await self.prisma.connect()
 
     @modal.web_endpoint(method="POST", label="llm-chat-stream-backend")
-    async def steam_backend(self, args: BackendArgs):
+    async def stream_backend(self, args: BackendArgs):
         import context
         import methods_web
 

@@ -1,4 +1,3 @@
-from pydantic import BaseModel
 import modal
 
 image_base = (
@@ -9,6 +8,7 @@ image_base = (
         "boto3~=1.33.6",
         "Pillow~=10.1.0",
         "requests~=2.31.0",
+        "python-ulid~=2.4.0",
     )
     .apt_install("curl")
     .run_commands(
@@ -17,8 +17,3 @@ image_base = (
     )
 )
 stub = modal.Stub("llm-chat-web-ui")
-
-
-class Message(BaseModel):
-    role: str
-    content: str

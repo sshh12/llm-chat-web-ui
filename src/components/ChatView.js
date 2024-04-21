@@ -4,7 +4,6 @@ import HistoryDrawer from "./HistoryDrawer";
 import Box from "@mui/material/Box";
 import CssBaseline from "@mui/material/CssBaseline";
 import TopBar from "./TopBar";
-import { useGet, useUpdate } from "../api";
 import SettingsDialog, { fixSettings } from "./SettingsDialog";
 import ShareDialog from "./ShareDialog";
 import { useBackend, usePostWithCache } from "../backend";
@@ -18,39 +17,42 @@ function ChatView({ theme }) {
   const [openSettings, setOpenSettings] = React.useState(false);
   const [openShare, setOpenShare] = React.useState(false);
 
-  const { user, ready: userReady } = useBackend();
-  const { result: _chat, ready: chatReady } = usePostWithCache(
-    chatId && "get_chat",
-    { id: chatId }
-  );
-  const loading = !userReady || !chatReady;
+  const { user, ready: userReady, update: updateUser } = useBackend();
+  const {
+    result: _chat,
+    ready: chatReady,
+    update: chatUpdate,
+  } = usePostWithCache(chatId && "get_chat", { id: chatId });
   const chat = Object.assign({}, _chat, {
     messages: _chat?.messages || [],
   });
   const settings = fixSettings(
     Object.assign({}, user?.chatSettings || {}, chat?.chatSettings || {})
   );
+  const loading = !userReady || !chatReady;
 
-  const appendMessage = (message) => {
-    // setChat((chat) => {
-    //   const newChat = {
-    //     id: chat.id,
-    //     messages: chat.messages.concat([message]),
-    //     chatSettings: settings,
-    //   };
-    //   updateChat(newChat).then((newChatRemote) => {
-    //     setChatId(newChatRemote.id);
-    //     setChat(newChatRemote);
-    //     window.history.pushState({}, "", "?chatId=" + newChatRemote.id);
-    //     // setUser((user) => ({
-    //     //   ...user,
-    //     //   chats: user.chats
-    //     //     .filter((c) => c.id !== newChatRemote.id)
-    //     //     .concat([newChatRemote]),
-    //     // }));
-    //   });
-    //   return newChat;
-    // });
+  const onChatGenerated = (messages) => {
+    const newChat = Object.assign({}, chat, {
+      messages: messages,
+    });
+    chatUpdate(
+      "update_chat_messages",
+      {
+        id: newChat.id || "",
+        messages: newChat.messages,
+        settings: settings,
+      },
+      newChat
+    ).then((newChatRemote) => {
+      setChatId(newChatRemote.id);
+      window.history.pushState({}, "", "?chatId=" + newChatRemote.id);
+      const newUser = Object.assign({}, user, {
+        chats: user.chats
+          .filter((c) => c.id !== newChatRemote.id)
+          .concat([newChatRemote]),
+      });
+      updateUser(null, {}, newUser);
+    });
   };
 
   const onSelectChat = (chatId) => {
@@ -59,14 +61,20 @@ function ChatView({ theme }) {
   };
 
   const onDeleteChat = (chatId) => {
-    // updateChat({ id: chatId, doDelete: true }).then((chat) => {
-    //   setChatId(null);
-    //   window.history.pushState({}, "", "/");
-    //   // setUser((user) => ({
-    //   //   ...user,
-    //   //   chats: user.chats.filter((c) => c.id !== chatId),
-    //   // }));
-    // });
+    setChatId(null);
+    window.history.pushState({}, "", "/");
+    chatUpdate(
+      "delete_chat",
+      {
+        id: chatId,
+      },
+      {}
+    ).then(() => {
+      const newUser = Object.assign({}, user, {
+        chats: user.chats.filter((c) => c.id !== chatId),
+      });
+      updateUser(null, {}, newUser);
+    });
   };
 
   const onNewChat = () => {
@@ -75,30 +83,42 @@ function ChatView({ theme }) {
   };
 
   const onUpdatedSettings = (settings, setDefault) => {
-    // setChat((chat) => ({ ...chat, chatSettings: settings }));
-    // if (chatId !== null) {
-    //   updateChat({ id: chatId, chatSettings: settings });
-    // }
-    // if (setDefault) {
-    //   // setUser((user) => ({ ...user, chatSettings: settings }));
-    //   updateUser({ chatSettings: settings });
-    // }
+    const newChat = Object.assign({}, chat, {
+      chatSettings: settings,
+    });
+    chatUpdate(
+      newChat.id && "update_chat_settings",
+      {
+        id: newChat.id || "",
+        settings: settings,
+      },
+      newChat
+    );
+    if (setDefault) {
+      const newUser = Object.assign({}, user, { chatSettings: settings });
+      updateUser("update_user_settings", { settings: settings }, newUser);
+    }
   };
 
   const resetChat = (idx) => {
-    // const newChat = {
-    //   id: chat.id,
-    //   messages: chat.messages.slice(0, idx),
-    //   chatSettings: settings,
-    // };
-    // setChat(newChat);
+    const newChat = Object.assign({}, chat, {
+      messages: chat.messages.slice(0, idx),
+    });
+    return chatUpdate(
+      "update_chat_messages",
+      {
+        id: newChat.id || "",
+        messages: newChat.messages,
+        settings: settings,
+      },
+      newChat
+    );
   };
 
   const setPublic = (isPublic) => {
-    // if (chatId !== null) {
-    //   // setChat((chat) => ({ ...chat, public: isPublic }));
-    //   updateChat({ id: chatId, public: isPublic });
-    // }
+    if (chatId !== null) {
+      chatUpdate("update_chat_public", { id: chatId, public: isPublic });
+    }
   };
 
   return (
@@ -137,7 +157,7 @@ function ChatView({ theme }) {
       />
       <Chat
         historyOpen={historyOpen}
-        appendMessage={appendMessage}
+        onChatGenerated={onChatGenerated}
         chat={chat}
         setGenerating={setGenerating}
         setOpenSettings={setOpenSettings}

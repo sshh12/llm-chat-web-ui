@@ -22,6 +22,62 @@ function post(func, args = {}) {
   }).then((response) => response.json());
 }
 
+export function postStream(func, args, onContent, onComplete) {
+  fetch(API_ENDPOINT, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      func: func,
+      args: args,
+      api_key: localStorage.getItem(API_KEY_KEY) || "",
+    }),
+  }).then(async (response) => {
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder("utf-8");
+
+    let result = "";
+    let data;
+    let cumulatedData = {};
+
+    while (!(data = await reader.read()).done) {
+      result += decoder.decode(data.value || new Uint8Array(), {
+        stream: true,
+      });
+      let endOfMessageIndex = result.indexOf("\n");
+
+      while (endOfMessageIndex !== -1) {
+        const message = result.substring(0, endOfMessageIndex);
+        result = result.substring(endOfMessageIndex + 1);
+
+        if (message) {
+          const jsonObject = JSON.parse(message);
+          for (let key in jsonObject) {
+            const isAppend = key.startsWith("append:");
+            const dataKey = isAppend ? key.substring(7) : key;
+
+            if (isAppend) {
+              if (jsonObject[key]) {
+                if (!cumulatedData[dataKey]) {
+                  cumulatedData[dataKey] = "";
+                }
+                cumulatedData[dataKey] += jsonObject[key];
+              }
+            } else {
+              cumulatedData[dataKey] = jsonObject[key];
+            }
+          }
+          onContent(cumulatedData);
+        }
+
+        endOfMessageIndex = result.indexOf("\n");
+      }
+    }
+    onComplete(cumulatedData);
+  });
+}
+
 export function useBackendControl() {
   const [ready, setReady] = useState(false);
   const [user, setUser] = useState(null);
@@ -32,35 +88,20 @@ export function useBackendControl() {
     _setCachedUser(cachedUser);
   };
 
-  const postThenUpdateUser = useCallback((func, args = {}) => {
+  const update = useCallback((func, args, newTempVal) => {
     setReady(false);
-    return post(func, args)
-      .then((result) => {
-        if (result.error) {
-          alert("Error " + result.error);
-          return { error: result.error };
-        }
-        return post("get_user")
-          .then((user) => {
-            if (user.error) {
-              alert("Error " + user.error);
-              return { error: user.error };
-            }
-            setReady(true);
-            setUser(user);
-            setCachedUser(user);
-            return { result, user };
-          })
-          .catch((e) => {
-            setReady(true);
-            alert("Error " + e);
-            return { error: e };
-          });
-      })
-      .catch((e) => {
+    setUser(newTempVal);
+    if (!func) {
+      setReady(true);
+      return null;
+    }
+    return post(func, args).then((val) => {
+      if (!val.error) {
+        setCachedUser(val);
         setReady(true);
-        return { error: e };
-      });
+      }
+      return val;
+    });
   }, []);
 
   useEffect(() => {
@@ -85,7 +126,8 @@ export function useBackendControl() {
     user: userObj,
     ready,
     post,
-    postThenUpdateUser,
+    postStream,
+    update,
   };
 }
 
@@ -99,6 +141,25 @@ export function usePostWithCache(func, args = {}) {
   const [result, setResult] = useState(null);
   const argsStr = args && JSON.stringify(args);
   const key = `llmchat:cache:${func}:${argsStr}`;
+  const update = useCallback(
+    (func, args, newTempVal) => {
+      setReady(false);
+      setResult(newTempVal);
+      if (!func) {
+        setReady(true);
+        return null;
+      }
+      return post(func, args).then((val) => {
+        if (!val.error) {
+          localStorage.setItem(key, JSON.stringify(val));
+          setResult(val);
+          setReady(true);
+        }
+        return val;
+      });
+    },
+    [key]
+  );
   useEffect(() => {
     if (func && argsStr !== null) {
       if (localStorage.getItem(key)) {
@@ -116,5 +177,5 @@ export function usePostWithCache(func, args = {}) {
       setResult(null);
     }
   }, [func, argsStr, key]);
-  return { ready, result };
+  return { ready, result, update };
 }
