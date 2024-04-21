@@ -1,6 +1,6 @@
 {
-  "short_name": "LLM Chat",
-  "name": "LLM Chat",
+  "short_name": "GenAI Chat",
+  "name": "GenAI Chat",
   "icons": [
     {
       "src": "favicon.ico",

@@ -29,7 +29,7 @@ function HistoryDrawer({
   selectedChatId,
 }) {
   const chatsSorted = (user?.chats || []).sort(
-    (a, b) => -a.createdAt.localeCompare(b.createdAt)
+    (a, b) => b.createdAt - a.createdAt
   );
   return (
     <Drawer

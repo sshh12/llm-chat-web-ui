@@ -1,6 +1,6 @@
-# LLM Chat
+# GenAI Chat
 
-> LLM Chat is an open-source serverless alternative to ChatGPT.
+> GenAI Chat is an open-source serverless alternative to ChatGPT.
 
 ## Design Goals
 

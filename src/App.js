@@ -7,6 +7,7 @@ import * as React from "react";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import ChatView from "./components/ChatView";
 import LoginDialog from "./components/LoginDialog";
+import { BackendContext, useBackendControl } from "./backend";
 
 const darkTheme = createTheme({
   palette: {
@@ -19,6 +20,7 @@ function App() {
     () => new URLSearchParams(window.location.search),
     []
   );
+  const backendProps = useBackendControl();
   const [apiKey] = React.useState(localStorage.getItem("llmchat:apiKey"));
   React.useEffect(() => {
     const apiKey = urlParams.get("key");
@@ -29,8 +31,10 @@ function App() {
   }, [urlParams]);
   return (
     <ThemeProvider theme={darkTheme}>
-      <LoginDialog open={apiKey === null && !urlParams.get("chatId")} />
-      <ChatView theme={darkTheme} />
+      <BackendContext.Provider value={backendProps}>
+        <LoginDialog open={apiKey === null && !urlParams.get("chatId")} />
+        <ChatView theme={darkTheme} />
+      </BackendContext.Provider>
     </ThemeProvider>
   );
 }
