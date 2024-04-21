@@ -8,6 +8,7 @@ import TextField from "@mui/material/TextField";
 import { Snackbar } from "@mui/material";
 import Stack from "@mui/material/Stack";
 import ContentPasteIcon from "@mui/icons-material/ContentPaste";
+import CodeIcon from "@mui/icons-material/Code";
 import CreateIcon from "@mui/icons-material/Create";
 import SaveIcon from "@mui/icons-material/Save";
 import CancelIcon from "@mui/icons-material/Cancel";
@@ -28,8 +29,8 @@ export default function ChatMessage({
   const [editText, setEditText] = React.useState(null);
   const showEdit = editText !== null;
 
-  const onCopy = () => {
-    navigator.clipboard.writeText(chatMessage.content);
+  const onCopy = (text) => {
+    navigator.clipboard.writeText(text);
     setShowCopied(true);
   };
 
@@ -40,10 +41,17 @@ export default function ChatMessage({
     setEditText(null);
   };
 
+  const codeBlocks = [];
+  const codeBlockRegex = /```(\w+)\n([\s\S]*?)\n```/g;
+  let match;
+  while ((match = codeBlockRegex.exec(chatMessage.content))) {
+    codeBlocks.push(match[2]);
+  }
+
   return (
     <Card
       sx={{
-        width: "100vw",
+        width: "98vw",
         margin: "0px 0px",
         boxShadow: "0px 1px 1px -1px rgba(0,0,0,0.2)",
         backgroundColor: chatMessage.role === "user" ? "#1e1e1e" : "#101010",
@@ -73,7 +81,20 @@ export default function ChatMessage({
                   <CreateIcon sx={{ fontSize: "1.4rem" }} />
                 </IconButton>
               )}
-              <IconButton size="small" color="primary" onClick={() => onCopy()}>
+              {chatMessage.role === "assistant" && codeBlocks.length > 0 && (
+                <IconButton
+                  size="small"
+                  color="primary"
+                  onClick={() => onCopy(codeBlocks.join("\n\n"))}
+                >
+                  <CodeIcon sx={{ fontSize: "1.4rem" }} />
+                </IconButton>
+              )}
+              <IconButton
+                size="small"
+                color="primary"
+                onClick={() => onCopy(chatMessage.content)}
+              >
                 <ContentPasteIcon sx={{ fontSize: "1.4rem" }} />
               </IconButton>
             </Box>

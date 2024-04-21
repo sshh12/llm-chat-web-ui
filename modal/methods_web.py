@@ -7,7 +7,8 @@ import datetime
 import json
 
 from models.chat_model import Message
-from models.chat_openai import OpenAIModel
+from models.chat_openai import OpenAIModel, summarize_chat
+from models.chat_dalle import OpenAIDalle
 import context
 
 METHODS = {}
@@ -23,6 +24,12 @@ def method_web(require_login: bool = True):
         return func
 
     return wrap
+
+
+MODELS = [
+    *OpenAIModel.get_models(),
+    *OpenAIDalle.get_models(),
+]
 
 
 def _chat_to_dict(chat: models.Chat) -> dict:
@@ -47,6 +54,7 @@ def _user_to_dict(user: models.User) -> dict:
         "name": user.name,
         "chatSettings": user.chatSettings,
         "chats": [_chat_to_dict(chat) for chat in user.chats],
+        "models": [{"key": m.key} for m in MODELS],
     }
 
 
@@ -85,8 +93,9 @@ async def stream_chat(
         )
         .replace("{{ name }}", ctx.user.name)
     )
-    print("stream_chat", id, messages, settings)
-    model = OpenAIModel(settings)
+    model = [m for m in MODELS if m.key == settings["modelKey"]][0]
+    settings.update(model.cfg)
+    model = model.cls(settings)
     return StreamingResponse(model.generate(msgs), media_type="text/event-stream")
 
 
@@ -96,12 +105,13 @@ async def update_chat_messages(
 ) -> Dict:
     if not id:
         new_id = str(ULID())
+        name = summarize_chat(messages)
         chat = await ctx.prisma.chat.create(
             {
                 "user": {"connect": {"id": ctx.user.id}},
                 "chatSettings": json.dumps(settings),
                 "id": new_id,
-                "name": "New Chat",
+                "name": name,
             }
         )
         await ctx.prisma.message.create_many(

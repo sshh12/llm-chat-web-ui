@@ -13,16 +13,20 @@ import Typography from "@mui/material/Typography";
 import TextField from "@mui/material/TextField";
 import Checkbox from "@mui/material/Checkbox";
 import Box from "@mui/material/Box";
-import { MODELS } from "../models";
+import { useBackend } from "../backend";
 
 const DEFAULT_SYSTEM_PROMPT = `You are Chat LLM, an expert large language model. Current date and time: {{ datetime }}, you are talking to {{ name }}. Use markdown in your response.`;
 
-export function fixSettings(settings) {
+export function fixSettings(settings, models) {
   if (settings === null) {
     settings = {};
   }
-  if (!settings.model) {
-    settings.model = MODELS[0];
+  if (
+    models &&
+    (!settings.modelKey || !models.find((m) => m.key === settings.modelKey))
+  ) {
+    const model = models.find((m) => m.includes("gpt-4-turbo"));
+    settings.modelKey = model.key;
   }
   if (!settings.temperature) {
     settings.temperature = 0.0;
@@ -42,6 +46,7 @@ export default function SettingsDialog({
   open,
   setOpen,
 }) {
+  const { user } = useBackend();
   return (
     <div>
       <Dialog open={open} onClose={() => setOpen(false)} fullWidth>
@@ -50,20 +55,21 @@ export default function SettingsDialog({
           <FormControl fullWidth sx={{ marginTop: "10px" }}>
             <InputLabel>Agent</InputLabel>
             <Select
-              value={settings.model}
+              value={settings.modelKey}
               label="Agent"
               onChange={(e) => {
                 onUpdatedSettings(
-                  { ...settings, model: e.target.value },
+                  { ...settings, modelKey: e.target.value },
                   false
                 );
               }}
             >
-              {MODELS.map((model) => (
-                <MenuItem key={model} value={model}>
-                  {model}
-                </MenuItem>
-              ))}
+              {user &&
+                user.models.map((model) => (
+                  <MenuItem key={model.key} value={model.key}>
+                    {model.key}
+                  </MenuItem>
+                ))}
             </Select>
           </FormControl>
           <TextField

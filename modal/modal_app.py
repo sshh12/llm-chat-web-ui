@@ -1,4 +1,4 @@
-from typing import List, Dict
+from typing import Dict
 from pydantic import BaseModel
 import modal
 
@@ -14,7 +14,11 @@ class BackendArgs(BaseModel):
 @stub.cls(
     secrets=[modal.Secret.from_name("llm-chat-secret")],
     image=image_base,
-    mounts=[modal.Mount.from_local_python_packages("context", "methods_web", "models")],
+    mounts=[
+        modal.Mount.from_local_python_packages(
+            "context", "methods_web", "models", "fs_tools"
+        )
+    ],
     container_idle_timeout=500,
     allow_concurrent_inputs=10,
     cpu=0.25,

@@ -125,7 +125,9 @@ function Chat({
           loading={loading}
           alert={i === messages.length - 1 ? alert : null}
           onUpdateText={(text) => {
-            resetChat(i).then((chat) => submitMessage(text, chat.messages));
+            resetChat(i).then((chat) =>
+              submitMessage(text, chat.messages || [])
+            );
           }}
         />
       ))}

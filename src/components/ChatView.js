@@ -27,7 +27,8 @@ function ChatView({ theme }) {
     messages: _chat?.messages || [],
   });
   const settings = fixSettings(
-    Object.assign({}, user?.chatSettings || {}, chat?.chatSettings || {})
+    Object.assign({}, user?.chatSettings || {}, chat?.chatSettings || {}),
+    user?.models
   );
   const loading = !userReady || !chatReady;
 

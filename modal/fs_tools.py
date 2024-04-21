@@ -1,3 +1,10 @@
+import requests
+import logging
+import base64
+import os
+import boto3
+
+
 def upload_image(image):
     import uuid
     import io
@@ -16,10 +23,6 @@ def upload_image(image):
 
 
 def upload_to_imgur(img_bytes) -> str:
-    import requests
-    import logging
-    import base64
-    import os
 
     IMGUR_CLIENT_ID = os.environ["IMGUR_CLIENT_ID"]
 
@@ -38,10 +41,6 @@ def upload_to_imgur(img_bytes) -> str:
 
 
 def upload_to_s3(file_bytes, file_name) -> str:
-    import boto3
-    import os
-    import logging
-
     AWS_ACCESS_KEY_ID = os.environ["AWS_ACCESS_KEY_ID"]
     AWS_SECRET_ACCESS_KEY = os.environ["AWS_SECRET_ACCESS_KEY"]
     AWS_BUCKET_NAME = os.environ["AWS_BUCKET_NAME"]
