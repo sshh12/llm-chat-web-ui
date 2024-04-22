@@ -25,7 +25,9 @@ export function fixSettings(settings, models) {
     models &&
     (!settings.modelKey || !models.find((m) => m.key === settings.modelKey))
   ) {
-    const model = models.find((m) => m.includes("gpt-4-turbo"));
+    const model = models.find(
+      (m) => m.includes("gpt-4-turbo") && m.includes("Tools")
+    );
     settings.modelKey = model.key;
   }
   if (!settings.temperature) {

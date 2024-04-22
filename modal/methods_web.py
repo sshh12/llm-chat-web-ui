@@ -7,8 +7,9 @@ import datetime
 import json
 
 from models.chat_model import Message
-from models.chat_openai import OpenAIModel, summarize_chat
+from models.chat_openai import OpenAIModel, OpenAIToolsModel, summarize_chat
 from models.chat_dalle import OpenAIDalle
+from models.chat_hf_inference import HFInferenceModel
 import context
 
 METHODS = {}
@@ -29,6 +30,8 @@ def method_web(require_login: bool = True):
 MODELS = [
     *OpenAIModel.get_models(),
     *OpenAIDalle.get_models(),
+    *OpenAIToolsModel.get_models(),
+    *HFInferenceModel.get_models(),
 ]
 
 

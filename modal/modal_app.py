@@ -3,6 +3,7 @@ from pydantic import BaseModel
 import modal
 
 from modal_base import image_base, stub
+from models.chat_hf_inference import LLAMA3Model
 
 
 class BackendArgs(BaseModel):
@@ -16,7 +17,7 @@ class BackendArgs(BaseModel):
     image=image_base,
     mounts=[
         modal.Mount.from_local_python_packages(
-            "context", "methods_web", "models", "fs_tools"
+            "context", "methods_web", "models", "fs_tools", "tools"
         )
     ],
     container_idle_timeout=500,
@@ -42,3 +43,8 @@ class LLMChatApp:
     @modal.exit()
     async def close_connection(self):
         await self.prisma.disconnect()
+
+
+@stub.cls(**LLAMA3Model.stub_config)
+class HuggingFaceLLAMA3Model(LLAMA3Model):
+    pass

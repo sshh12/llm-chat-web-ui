@@ -109,6 +109,9 @@ export function useBackendControl() {
       return;
     }
     window.initRunning = true;
+    if (localStorage.getItem(CACHED_USER_KEY)) {
+      _setCachedUser(JSON.parse(localStorage.getItem(CACHED_USER_KEY)));
+    }
     post("get_user")
       .then((user) => {
         setReady(true);

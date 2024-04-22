@@ -24,7 +24,7 @@ This comes at the cost of:
 ## Features
 
 - Easy to add arbitrary plugins/functions/agents
-- Easy to add hugging face open source transformers
+- Easy to add hugging face open source transformers (LLAMA 3)
 - OpenAI API streaming
 - Image generation (StableDiffusion XL, DALLE)
 - Automatic chat title generation
@@ -69,8 +69,9 @@ AWS_BUCKET_NAME
 ```
 
 8. Deploy modal `cd modal && modal deploy modalapp`
-9. Create an API key `cd modal && python create_user.py --name "John Smith"`
-10. Go to `<netlify site>/?key=<API key>`
+9. Create an API key `cd modal && python scripts/create_user.py --name "John Smith"`
+10. Update `src\backend.js` with deployed modal endpoint (`API_ENDPOINT`)
+11. Go to `<netlify site>/?key=<API key>`
 
 ## Advanced
 
@@ -78,10 +79,8 @@ AWS_BUCKET_NAME
 
 _Note that plugins are only supported for openai functions agents._
 
-Just add a new function to `FUNCTIONS` in `modal/chat_openai_functions.py`.
+Just add a new function to `/modal/tools/tools.py`.
 
 ### Add a new model
 
-1. Duplicate `modal/chat_vllm_hf.py` and adjust to whatever model you want
-2. Update `modal/modalapp.py` to check for this `model_namespace` in `generate` (then deploy modal)
-3. Update `SettingsDialog.js` to include this new model name (then deploy netlify)
+1. Update `models/chat_hf_inference.py` and adjust to whatever model you want

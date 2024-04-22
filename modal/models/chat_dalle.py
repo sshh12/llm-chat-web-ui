@@ -17,6 +17,21 @@ def get_model_names():
     ]
 
 
+def generate_image(prompt: str) -> str:
+    client = OpenAI()
+    response = client.images.generate(
+        model="dall-e-3",
+        prompt=prompt,
+        size="1024x1024",
+        quality="hd",
+        n=1,
+    )
+
+    raw_image_url = response.data[0].url
+    image_url = upload_image(Image.open(requests.get(raw_image_url, stream=True).raw))
+    return image_url
+
+
 class OpenAIDalle(ChatModel):
     def __init__(self, cfg: Dict):
         self.model = cfg["model"]
