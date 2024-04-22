@@ -3,13 +3,11 @@ import logging
 import base64
 import os
 import boto3
+import uuid
+import io
 
 
 def upload_image(image):
-    import uuid
-    import io
-    import os
-
     byte_stream = io.BytesIO()
     image.save(byte_stream, format="PNG")
     image_bytes = byte_stream.getvalue()
