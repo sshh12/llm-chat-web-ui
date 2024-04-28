@@ -77,7 +77,7 @@ function Chat({
     const setLatestContent = (content) => {
       setLatestChat((latestChat) => {
         const newLatestChat = [...latestChat];
-        newLatestChat[newLatestChat.length - 1].text = content;
+        newLatestChat[newLatestChat.length - 1].content = content;
         return newLatestChat;
       });
     };
