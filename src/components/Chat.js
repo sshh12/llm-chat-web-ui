@@ -4,12 +4,16 @@ import TextField from "@mui/material/TextField";
 import Paper from "@mui/material/Paper";
 import Divider from "@mui/material/Divider";
 import IconButton from "@mui/material/IconButton";
+import KeyboardVoice from "@mui/icons-material/KeyboardVoice";
 import Box from "@mui/material/Box";
 import SendIcon from "@mui/icons-material/Send";
 import SettingsApplicationsIcon from "@mui/icons-material/SettingsApplications";
 import Stack from "@mui/material/Stack";
 import ChatMessage from "./ChatMessage.js";
 import { useBackend } from "../backend.js";
+import SpeechRecognition, {
+  useSpeechRecognition,
+} from "react-speech-recognition";
 
 const DrawerHeader = styled("div")(({ theme }) => ({
   display: "flex",
@@ -56,63 +60,89 @@ function Chat({
   const [latestChat, setLatestChat] = React.useState([]);
   const [alert, setAlert] = React.useState(null);
   const { postStream } = useBackend();
+  const {
+    transcript,
+    listening,
+    browserSupportsSpeechRecognition,
+    resetTranscript,
+  } = useSpeechRecognition();
 
-  const submitMessage = (newUserMessage, chatMessages) => {
-    const promptMessages = [
-      ...chatMessages,
-      { role: "user", content: newUserMessage },
-    ];
-    setLatestChat([
-      {
-        role: "user",
-        content: newUserMessage,
-      },
-      {
-        role: "assistant",
-        content: "",
-      },
-    ]);
-    setLoading(true);
-    setGenerating(true);
-    const setLatestContent = (content) => {
-      setLatestChat((latestChat) => {
-        const newLatestChat = [...latestChat];
-        newLatestChat[newLatestChat.length - 1].content = content;
-        return newLatestChat;
-      });
-    };
-    setTimeout(() => {
-      window.scrollBy(0, 1000);
-      postStream(
-        "stream_chat",
-        { id: chat.id || "", messages: promptMessages, settings: settings },
-        (streamData) => {
-          setAlert(streamData.alert || null);
-          setLatestContent(streamData.content || "");
+  const submitMessage = React.useCallback(
+    (newUserMessage, chatMessages) => {
+      const promptMessages = [
+        ...chatMessages,
+        { role: "user", content: newUserMessage },
+      ];
+      setLatestChat([
+        {
+          role: "user",
+          content: newUserMessage,
         },
-        (streamData) => {
-          onChatGenerated(
-            promptMessages.concat([
-              {
-                role: "assistant",
-                content: streamData.content,
-              },
-            ])
-          );
-          setLatestChat([]);
-          setAlert(null);
-          setLoading(false);
-          setGenerating(false);
-        }
-      );
-    }, 10);
-    setMessage("");
-  };
+        {
+          role: "assistant",
+          content: "",
+        },
+      ]);
+      setLoading(true);
+      setGenerating(true);
+      const setLatestContent = (content) => {
+        setLatestChat((latestChat) => {
+          const newLatestChat = [...latestChat];
+          newLatestChat[newLatestChat.length - 1].content = content;
+          return newLatestChat;
+        });
+      };
+      setTimeout(() => {
+        window.scrollBy(0, 1000);
+        postStream(
+          "stream_chat",
+          { id: chat.id || "", messages: promptMessages, settings: settings },
+          (streamData) => {
+            setAlert(streamData.alert || null);
+            setLatestContent(streamData.content || "");
+          },
+          (streamData) => {
+            onChatGenerated(
+              promptMessages.concat([
+                {
+                  role: "assistant",
+                  content: streamData.content,
+                },
+              ])
+            );
+            setLatestChat([]);
+            setAlert(null);
+            setLoading(false);
+            setGenerating(false);
+          }
+        );
+      }, 10);
+      setMessage("");
+    },
+    [chat.id, onChatGenerated, postStream, setGenerating, settings]
+  );
 
   let messages = [...chat.messages];
   if (latestChat.length > 0) {
     messages.push(...latestChat);
   }
+
+  React.useEffect(() => {
+    if (transcript && !listening) {
+      setMessage(transcript);
+      if (settings.submitOnVoice) {
+        resetTranscript();
+        submitMessage(transcript, chat.messages);
+      }
+    }
+  }, [
+    submitMessage,
+    resetTranscript,
+    listening,
+    chat.messages,
+    transcript,
+    settings,
+  ]);
 
   return (
     <Main open={historyOpen}>
@@ -174,6 +204,18 @@ function Chat({
               >
                 <SendIcon sx={{ fontSize: "2rem" }} />
               </IconButton>
+              {browserSupportsSpeechRecognition && (
+                <IconButton
+                  color={listening ? "warning" : "primary"}
+                  onClick={
+                    listening
+                      ? SpeechRecognition.stopListening
+                      : SpeechRecognition.startListening
+                  }
+                >
+                  <KeyboardVoice sx={{ fontSize: "2rem" }} />
+                </IconButton>
+              )}
               <IconButton
                 color="secondary"
                 onClick={() => setOpenSettings(true)}

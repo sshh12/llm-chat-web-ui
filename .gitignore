@@ -25,3 +25,4 @@ yarn-error.log*
 env.bat
 venv/
 *.pyc
+whisper_real_time

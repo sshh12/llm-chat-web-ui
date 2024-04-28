@@ -4,7 +4,9 @@ export const BackendContext = React.createContext({});
 
 export const BASE_URL = "https://astro.sshh.io";
 export const APP_VERSION = "0.3.0";
-const API_ENDPOINT = "https://sshh12--llm-chat-stream-backend.modal.run/";
+const API_ENDPOINT =
+  new URLSearchParams(window.location.search).get("server") ||
+  "https://sshh12--llm-chat-stream-backend.modal.run/";
 const API_KEY_KEY = "llmchat2:apiKey";
 const CACHED_USER_KEY = "llmchat2:cachedUser";
 

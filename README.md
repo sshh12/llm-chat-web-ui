@@ -70,7 +70,7 @@ AWS_BUCKET_NAME
 
 8. Deploy modal `cd modal && modal deploy modalapp`
 9. Create an API key `cd modal && python scripts/create_user.py --name "John Smith"`
-10. Update `src\backend.js` with deployed modal endpoint (`API_ENDPOINT`)
+10. Update `src\backend.js` with deployed modal endpoint (`API_ENDPOINT`) OR use `?backend=<modal endpoint>` in the URL at `chat.sshh.io`.
 11. Go to `<netlify site>/?key=<API key>`
 
 ## Advanced

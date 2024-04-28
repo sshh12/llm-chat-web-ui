@@ -39,6 +39,9 @@ export function fixSettings(settings, models) {
   if (settings.submitOnEnter === undefined) {
     settings.submitOnEnter = true;
   }
+  if (settings.submitOnVoice === undefined) {
+    settings.submitOnVoice = false;
+  }
   return settings;
 }
 
@@ -114,6 +117,20 @@ export default function SettingsDialog({
               onChange={(e) => {
                 onUpdatedSettings(
                   { ...settings, submitOnEnter: e.target.checked },
+                  false
+                );
+              }}
+            />
+          </Box>
+          <Box sx={{ paddingTop: "1rem" }}>
+            <Typography gutterBottom sx={{ fontSize: 12, color: "#eee" }}>
+              Submit On Voice
+            </Typography>
+            <Checkbox
+              checked={settings.submitOnVoice}
+              onChange={(e) => {
+                onUpdatedSettings(
+                  { ...settings, submitOnVoice: e.target.checked },
                   false
                 );
               }}
