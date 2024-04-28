@@ -143,7 +143,7 @@ export function usePostWithCache(func, args = {}) {
   const [ready, setReady] = useState(false);
   const [result, setResult] = useState(null);
   const argsStr = args && JSON.stringify(args);
-  const key = `llmchat:cache:${func}:${argsStr}`;
+  const key = `llmchat2:cache:${func}:${argsStr}`;
   const update = useCallback(
     (func, args, newTempVal) => {
       setReady(false);

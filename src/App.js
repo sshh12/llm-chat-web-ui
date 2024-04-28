@@ -21,11 +21,11 @@ function App() {
     []
   );
   const backendProps = useBackendControl();
-  const [apiKey] = React.useState(localStorage.getItem("llmchat:apiKey"));
+  const [apiKey] = React.useState(localStorage.getItem("llmchat2:apiKey"));
   React.useEffect(() => {
     const apiKey = urlParams.get("key");
     if (apiKey) {
-      localStorage.setItem("llmchat:apiKey", apiKey.trim());
+      localStorage.setItem("llmchat2:apiKey", apiKey.trim());
       window.location = "/";
     }
   }, [urlParams]);
