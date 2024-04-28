@@ -26,7 +26,7 @@ export function fixSettings(settings, models) {
     (!settings.modelKey || !models.find((m) => m.key === settings.modelKey))
   ) {
     const model = models.find(
-      (m) => m.includes("gpt-4-turbo") && m.includes("Tools")
+      (m) => m.key.includes("gpt-4-turbo") && m.key.includes("Tools")
     );
     settings.modelKey = model.key;
   }
