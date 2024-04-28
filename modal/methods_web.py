@@ -113,7 +113,9 @@ async def stream_chat_audio(
     msgs = [Message(**m) for m in messages]
 
     settings["systemPrompt"] = (
-        f"You are a helpful voice assistant for {ctx.user.name}. Speak naturally and do not use markdown as your words will be encoded as audio. Speak briefly as if this was a real life conversation."
+        f"You are a helpful voice assistant for {ctx.user.name}."
+        ' Speak naturally and do not use markdown as your words will be encoded as audio for elevenlabs (use <break time="1.5s" /> for pauses).'
+        " Answer briefly as if this was a real life conversation."
     )
     settings.setdefault("modelKey", BEST_MODEL_KEY)
     model = [m for m in MODELS if m.key == settings["modelKey"]][0]
@@ -137,8 +139,8 @@ async def stream_chat_audio(
     def stream_with_meta():
         audio_stream = tts_tools.stream_audio(
             generate_reply(),
-            voice="7iELKknajFrchQm92EYX",
-            model="eleven_multilingual_v2",
+            voice="IfhhxnrmA2m4NhCRCzhL",
+            model="eleven_turbo_v2",
         )
         for chunk in audio_stream:
             yield json.dumps({"audio": base64.b64encode(chunk).decode(), **meta}) + "\n"

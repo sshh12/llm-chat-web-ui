@@ -24,8 +24,9 @@ export default function VoiceChatDialog({ open, setOpen, settings }) {
       setMessages([]);
       setLatestResponse(null);
       SpeechRecognition.stopListening();
+      resetTranscript();
     }
-  }, [open]);
+  }, [open, resetTranscript]);
 
   const onSubmit = React.useCallback(
     (newMessage) => {
