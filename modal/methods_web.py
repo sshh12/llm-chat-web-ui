@@ -116,6 +116,7 @@ async def stream_chat_audio(
         f"You are a helpful voice assistant for {ctx.user.name}."
         ' Speak naturally and do not use markdown as your words will be encoded as audio for elevenlabs (use <break time="1.5s" /> for pauses).'
         " Answer briefly as if this was a real life conversation."
+        " Greet the user and speak with some personality. Ask questions if the task is ambiguous."
     )
     settings.setdefault("modelKey", BEST_MODEL_KEY)
     model = [m for m in MODELS if m.key == settings["modelKey"]][0]
