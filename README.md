@@ -29,6 +29,7 @@ This comes at the cost of:
 - Image generation (StableDiffusion XL, DALLE)
 - Automatic chat title generation
 - Sharable links (when you make a chat public)
+- Speech (STT) to Audio (TTS) voice chat
 
 ## Setup
 
@@ -66,6 +67,7 @@ IMGUR_CLIENT_ID
 AWS_ACCESS_KEY_ID
 AWS_SECRET_ACCESS_KEY
 AWS_BUCKET_NAME
+ELEVEN_API_KEY
 ```
 
 8. Deploy modal `cd modal && modal deploy modalapp`

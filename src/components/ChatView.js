@@ -6,6 +6,7 @@ import CssBaseline from "@mui/material/CssBaseline";
 import TopBar from "./TopBar";
 import SettingsDialog, { fixSettings } from "./SettingsDialog";
 import ShareDialog from "./ShareDialog";
+import VoiceChatDialog from "./VoiceChatDialog";
 import { useBackend, usePostWithCache } from "../backend";
 
 function ChatView({ theme }) {
@@ -16,6 +17,7 @@ function ChatView({ theme }) {
   const [generating, setGenerating] = React.useState(false);
   const [openSettings, setOpenSettings] = React.useState(false);
   const [openShare, setOpenShare] = React.useState(false);
+  const [openVoiceChat, setOpenVoiceChat] = React.useState(false);
 
   const { user, ready: userReady, update: updateUser } = useBackend();
   const {
@@ -30,7 +32,7 @@ function ChatView({ theme }) {
     Object.assign({}, user?.chatSettings || {}, chat?.chatSettings || {}),
     user?.models
   );
-  const loading = !userReady || !chatReady;
+  const loading = !userReady || !chatReady || !user?.models;
 
   const onChatGenerated = (messages) => {
     const newChat = Object.assign({}, chat, {
@@ -135,6 +137,7 @@ function ChatView({ theme }) {
         onDeleteChat={onDeleteChat}
         onNewChat={onNewChat}
         user={user}
+        setOpenVoiceChat={setOpenVoiceChat}
       />
       <HistoryDrawer
         open={historyOpen}
@@ -156,6 +159,11 @@ function ChatView({ theme }) {
         setPublic={setPublic}
         isPublic={chat?.public}
       />
+      <VoiceChatDialog
+        open={openVoiceChat}
+        setOpen={setOpenVoiceChat}
+        settings={settings}
+      />
       <Chat
         historyOpen={historyOpen}
         onChatGenerated={onChatGenerated}
@@ -164,6 +172,7 @@ function ChatView({ theme }) {
         setOpenSettings={setOpenSettings}
         settings={settings}
         resetChat={resetChat}
+        enableVoice={!openVoiceChat}
       />
     </Box>
   );

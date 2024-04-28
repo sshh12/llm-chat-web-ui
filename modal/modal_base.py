@@ -8,6 +8,7 @@ BASE_PACKAGES = [
     "requests~=2.31.0",
     "python-ulid~=2.4.0",
     "wolframalpha==5.0.0",
+    "elevenlabs~=1.2.0",
 ]
 
 image_base = (

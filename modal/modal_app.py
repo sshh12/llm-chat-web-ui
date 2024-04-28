@@ -17,7 +17,7 @@ class BackendArgs(BaseModel):
     image=image_base,
     mounts=[
         modal.Mount.from_local_python_packages(
-            "context", "methods_web", "models", "fs_tools", "tools"
+            "context", "methods_web", "models", "fs_tools", "tts_tools", "tools"
         )
     ],
     container_idle_timeout=500,

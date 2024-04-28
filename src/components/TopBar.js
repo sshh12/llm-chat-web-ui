@@ -8,6 +8,7 @@ import AddIcon from "@mui/icons-material/Add";
 import Stack from "@mui/material/Stack";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ShareIcon from "@mui/icons-material/Share";
+import ConnectWithoutContact from "@mui/icons-material/ConnectWithoutContact";
 import LinearProgress from "@mui/material/LinearProgress";
 
 const drawerWidth = 240;
@@ -39,6 +40,7 @@ function TopBar({
   loading,
   generating,
   user,
+  setOpenVoiceChat,
 }) {
   return (
     <AppBarStyled position="fixed" open={historyOpen}>
@@ -57,6 +59,15 @@ function TopBar({
           {chat?.name || "Chat"}
         </Typography>
         <Stack direction="row" spacing={0} edge="end">
+          {!chat.isGuest && (
+            <IconButton
+              size="large"
+              color="primary"
+              onClick={() => setOpenVoiceChat(true)}
+            >
+              <ConnectWithoutContact />
+            </IconButton>
+          )}
           {!chat.isGuest && chat?.id && (
             <IconButton
               size="large"

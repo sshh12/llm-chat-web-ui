@@ -10,6 +10,8 @@ from models.chat_model import Message
 from models.chat_openai import OpenAIModel, OpenAIToolsModel, summarize_chat
 from models.chat_dalle import OpenAIDalle
 from models.chat_hf_inference import HFInferenceModel
+import base64
+import tts_tools
 import context
 
 METHODS = {}
@@ -33,6 +35,7 @@ MODELS = [
     *OpenAIToolsModel.get_models(),
     *HFInferenceModel.get_models(),
 ]
+BEST_MODEL_KEY = "OpenAI+Tools:gpt-4-turbo"
 
 
 def _chat_to_dict(chat: models.Chat) -> dict:
@@ -89,6 +92,7 @@ async def stream_chat(
         assert chat and ctx.user.id == chat.user.id
     msgs = [Message(**m) for m in messages]
 
+    settings.setdefault("modelKey", BEST_MODEL_KEY)
     settings["systemPrompt"] = (
         settings["systemPrompt"]
         .replace(
@@ -100,6 +104,46 @@ async def stream_chat(
     settings.update(model.cfg)
     model = model.cls(settings)
     return StreamingResponse(model.generate(msgs), media_type="text/event-stream")
+
+
+@method_web()
+async def stream_chat_audio(
+    ctx: context.Context, messages: List[Dict], settings: Dict
+) -> Dict:
+    msgs = [Message(**m) for m in messages]
+
+    settings["systemPrompt"] = (
+        f"You are a helpful voice assistant for {ctx.user.name}. Speak naturally and do not use markdown as your words will be encoded as audio. Speak briefly as if this was a real life conversation."
+    )
+    settings.setdefault("modelKey", BEST_MODEL_KEY)
+    model = [m for m in MODELS if m.key == settings["modelKey"]][0]
+    settings.update(model.cfg)
+    model = model.cls(settings)
+
+    meta = {"content": "", "alert": "", "state": "starting"}
+
+    def generate_reply():
+        for chunk in model.generate(msgs):
+            meta["state"] = "model-decoding"
+            chunk_data = json.loads(chunk.strip())
+            append_content = chunk_data.get("append:content", "")
+            meta["content"] += append_content
+            yield append_content
+            alert = chunk_data.get("alert")
+            if alert:
+                meta["alert"] = alert
+        meta["state"] = "model-complete"
+
+    def stream_with_meta():
+        audio_stream = tts_tools.stream_audio(
+            generate_reply(),
+            voice="7iELKknajFrchQm92EYX",
+            model="eleven_multilingual_v2",
+        )
+        for chunk in audio_stream:
+            yield json.dumps({"audio": base64.b64encode(chunk).decode(), **meta}) + "\n"
+
+    return StreamingResponse(stream_with_meta(), media_type="text/event-stream")
 
 
 @method_web()

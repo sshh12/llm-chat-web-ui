@@ -80,6 +80,84 @@ export function postStream(func, args, onContent, onComplete) {
   });
 }
 
+export function postAudioStream(func, args, onContent, onComplete) {
+  if (!window.MediaSource) {
+    console.error("MediaSource API is not supported in this browser");
+    return;
+  }
+
+  const mediaSource = new MediaSource();
+  const audio = new Audio();
+  audio.src = URL.createObjectURL(mediaSource);
+  let content = "";
+
+  mediaSource.addEventListener("sourceopen", async () => {
+    try {
+      const sourceBuffer = mediaSource.addSourceBuffer("audio/mpeg");
+      const waitForUpdateEnd = () =>
+        new Promise((resolve) => {
+          sourceBuffer.addEventListener("updateend", resolve);
+        });
+      const response = await fetch(API_ENDPOINT, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          func: func,
+          args: args,
+          api_key: localStorage.getItem(API_KEY_KEY) || "",
+        }),
+      });
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder("utf-8");
+      let result = "";
+      let data;
+
+      while (!(data = await reader.read()).done) {
+        result += decoder.decode(data.value || new Uint8Array(), {
+          stream: true,
+        });
+        let endOfMessageIndex = result.indexOf("\n");
+
+        while (endOfMessageIndex !== -1) {
+          const message = result.substring(0, endOfMessageIndex);
+          result = result.substring(endOfMessageIndex + 1);
+
+          if (message) {
+            const jsonObject = JSON.parse(message);
+            content = jsonObject.content;
+            const audioBytes = Uint8Array.from(atob(jsonObject.audio), (c) =>
+              c.charCodeAt(0)
+            );
+            if (sourceBuffer.updating) {
+              await waitForUpdateEnd();
+            }
+            sourceBuffer.appendBuffer(audioBytes.buffer);
+            onContent({ content: content });
+          }
+          endOfMessageIndex = result.indexOf("\n");
+        }
+      }
+      if (sourceBuffer.updating) {
+        await waitForUpdateEnd();
+      }
+      try {
+        mediaSource.endOfStream();
+      } catch (error) {
+        console.warn("Error closing the source buffer:", error);
+      }
+    } catch (error) {
+      console.warn("Error fetching or processing the audio stream:", error);
+      mediaSource.endOfStream("network");
+    }
+  });
+  audio.play().catch((error) => console.error("Error playing audio:", error));
+  audio.addEventListener("ended", () => {
+    onComplete({ content: content });
+  });
+}
+
 export function useBackendControl() {
   const [ready, setReady] = useState(false);
   const [user, setUser] = useState(null);

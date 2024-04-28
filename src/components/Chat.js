@@ -54,6 +54,7 @@ function Chat({
   setOpenSettings,
   settings,
   resetChat,
+  enableVoice,
 }) {
   const [message, setMessage] = React.useState("");
   const [loading, setLoading] = React.useState(false);
@@ -128,7 +129,7 @@ function Chat({
   }
 
   React.useEffect(() => {
-    if (transcript && !listening) {
+    if (transcript && !listening && enableVoice) {
       setMessage(transcript);
       if (settings.submitOnVoice) {
         resetTranscript();
@@ -142,6 +143,7 @@ function Chat({
     chat.messages,
     transcript,
     settings,
+    enableVoice,
   ]);
 
   return (
@@ -204,9 +206,9 @@ function Chat({
               >
                 <SendIcon sx={{ fontSize: "2rem" }} />
               </IconButton>
-              {browserSupportsSpeechRecognition && (
+              {browserSupportsSpeechRecognition && enableVoice && (
                 <IconButton
-                  color={listening ? "warning" : "primary"}
+                  color={listening ? "warning" : "secondary"}
                   onClick={
                     listening
                       ? SpeechRecognition.stopListening
