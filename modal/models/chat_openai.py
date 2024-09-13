@@ -11,13 +11,13 @@ from tools.tools import get_openai_tools, call_tool
 @cache
 def get_model_names():
     client = OpenAI()
-    return [model.id for model in client.models.list() if model.id.startswith("gpt-")]
+    return [model.id for model in client.models.list() if model.id.startswith("gpt-") or model.id.startswith('o1-')]
 
 
 def summarize_chat(messages: List[Dict]) -> str:
     client = OpenAI()
     args = dict(
-        model="gpt-4-turbo",
+        model="gpt-4o-mini",
         temperature=0.1,
         messages=[
             dict(
@@ -30,8 +30,43 @@ def summarize_chat(messages: List[Dict]) -> str:
     resp = client.chat.completions.create(**args)
     return resp.choices[0].message.content
 
-
 class OpenAIModel(ChatModel):
+    def __init__(self, cfg: Dict):
+        self.model = cfg["model"]
+        self.temperature = cfg["temperature"]
+        self.system_prompt = cfg["systemPrompt"]
+        self.client = OpenAI()
+
+    def generate(self, chat: List[Message]):
+        messages = []
+        if self.system_prompt:
+            messages.append(dict(role="system", content=self.system_prompt))
+        messages += [dict(role=m.role, content=m.content) for m in chat]
+
+        args = dict(
+            model=self.model,
+            messages=messages,
+            temperature=self.temperature,
+        )
+        yield json.dumps(
+            {"alert": f"Using {self.model}(...)"}
+        ) + "\n"
+        try:
+            resp = self.client.chat.completions.create(**args)
+            content = resp.choices[0].message.content
+            yield json.dumps({"append:content": content}) + "\n"
+        except Exception as e:
+            yield json.dumps({"append:content": f"{e}"}) + "\n"
+        time.sleep(0.01)
+
+    @classmethod
+    def get_models(cls) -> List[ChatModelDescription]:
+        return [
+            ChatModelDescription(cls=cls, cfg={"model": m}, key=f"OpenAI:{m}")
+            for m in get_model_names()
+        ]
+
+class StreamOpenAIModel(ChatModel):
     def __init__(self, cfg: Dict):
         self.model = cfg["model"]
         self.temperature = cfg["temperature"]
@@ -55,12 +90,12 @@ class OpenAIModel(ChatModel):
     @classmethod
     def get_models(cls) -> List[ChatModelDescription]:
         return [
-            ChatModelDescription(cls=cls, cfg={"model": m}, key=f"OpenAI:{m}")
+            ChatModelDescription(cls=cls, cfg={"model": m}, key=f"StreamOpenAI:{m}")
             for m in get_model_names()
         ]
 
 
-class OpenAIToolsModel(ChatModel):
+class StreamOpenAIToolsModel(ChatModel):
     def __init__(self, cfg: Dict):
         self.model = cfg["model"]
         self.temperature = cfg["temperature"]
@@ -144,6 +179,6 @@ class OpenAIToolsModel(ChatModel):
     @classmethod
     def get_models(cls) -> List[ChatModelDescription]:
         return [
-            ChatModelDescription(cls=cls, cfg={"model": m}, key=f"OpenAI+Tools:{m}")
+            ChatModelDescription(cls=cls, cfg={"model": m}, key=f"StreamOpenAI+Tools:{m}")
             for m in get_model_names()
         ]

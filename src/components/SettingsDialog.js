@@ -30,10 +30,10 @@ export function fixSettings(settings, models) {
     );
     settings.modelKey = model.key;
   }
-  if (!settings.temperature) {
+  if (settings.temperature === undefined) {
     settings.temperature = 0.0;
   }
-  if (!settings.systemPrompt) {
+  if (settings.systemPrompt === undefined) {
     settings.systemPrompt = DEFAULT_SYSTEM_PROMPT;
   }
   if (settings.submitOnEnter === undefined) {
@@ -52,6 +52,10 @@ export default function SettingsDialog({
   setOpen,
 }) {
   const { user } = useBackend();
+  const [editSettings, setEditSettings] = React.useState(settings);
+  React.useEffect (() => {
+    setEditSettings(settings);
+  }, [settings]);
   return (
     <div>
       <Dialog open={open} onClose={() => setOpen(false)} fullWidth>
@@ -60,12 +64,12 @@ export default function SettingsDialog({
           <FormControl fullWidth sx={{ marginTop: "10px" }}>
             <InputLabel>Agent</InputLabel>
             <Select
-              value={settings.modelKey}
+              value={editSettings.modelKey}
               label="Agent"
               onChange={(e) => {
-                onUpdatedSettings(
+                setEditSettings(
                   { ...settings, modelKey: e.target.value },
-                  false
+             
                 );
               }}
             >
@@ -83,11 +87,10 @@ export default function SettingsDialog({
             fullWidth
             multiline
             rows={4}
-            value={settings.systemPrompt}
+            value={editSettings.systemPrompt}
             onChange={(e) => {
-              onUpdatedSettings(
+              setEditSettings(
                 { ...settings, systemPrompt: e.target.value },
-                false
               );
             }}
             placeholder="System Prompt"
@@ -97,11 +100,10 @@ export default function SettingsDialog({
               Temperature
             </Typography>
             <Slider
-              value={settings.temperature}
+              value={editSettings.temperature}
               onChange={(e) => {
-                onUpdatedSettings(
+                setEditSettings(
                   { ...settings, temperature: e.target.value },
-                  false
                 );
               }}
               step={0.1}
@@ -113,11 +115,11 @@ export default function SettingsDialog({
               Submit On Enter
             </Typography>
             <Checkbox
-              checked={settings.submitOnEnter}
+              checked={editSettings.submitOnEnter}
               onChange={(e) => {
-                onUpdatedSettings(
+                setEditSettings(
                   { ...settings, submitOnEnter: e.target.checked },
-                  false
+    
                 );
               }}
             />
@@ -127,11 +129,10 @@ export default function SettingsDialog({
               Submit On Voice
             </Typography>
             <Checkbox
-              checked={settings.submitOnVoice}
+              checked={editSettings.submitOnVoice}
               onChange={(e) => {
-                onUpdatedSettings(
+                setEditSettings(
                   { ...settings, submitOnVoice: e.target.checked },
-                  false
                 );
               }}
             />
@@ -141,7 +142,7 @@ export default function SettingsDialog({
           <Button
             onClick={() => {
               setOpen(false);
-              onUpdatedSettings(settings, true);
+              onUpdatedSettings(editSettings, true);
             }}
           >
             Set As Default
@@ -149,6 +150,7 @@ export default function SettingsDialog({
           <Button
             onClick={() => {
               setOpen(false);
+              onUpdatedSettings(editSettings, false);
             }}
           >
             Done

@@ -7,9 +7,8 @@ import datetime
 import json
 
 from models.chat_model import Message
-from models.chat_openai import OpenAIModel, OpenAIToolsModel, summarize_chat
+from models.chat_openai import OpenAIModel, StreamOpenAIModel, StreamOpenAIToolsModel, summarize_chat
 from models.chat_dalle import OpenAIDalle
-from models.chat_hf_inference import HFInferenceModel
 import base64
 import tts_tools
 import context
@@ -31,11 +30,11 @@ def method_web(require_login: bool = True):
 
 MODELS = [
     *OpenAIModel.get_models(),
+    *StreamOpenAIModel.get_models(),
     *OpenAIDalle.get_models(),
-    *OpenAIToolsModel.get_models(),
-    *HFInferenceModel.get_models(),
+    *StreamOpenAIToolsModel.get_models(),
 ]
-BEST_MODEL_KEY = "OpenAI+Tools:gpt-4-turbo"
+BEST_MODEL_KEY = "StreamOpenAI+Tools:gpt-4o"
 
 
 def _chat_to_dict(chat: models.Chat) -> dict:
